@@ -32,11 +32,19 @@ GLuint	load_shader(const char *vertex_path, const char *fragment_path)
 	std::ifstream	vertex_file(vertex_path);
 	std::ifstream	fragment_file(fragment_path);
 
-	if (!vertex_file.is_open() || !fragment_file.is_open())
+	if (!vertex_file.is_open())
 	{
-		std::cerr << "Failed to open shader files" << std::endl;
+		std::cerr << "Failed to open vertex shader: " << vertex_path << std::endl;
 		return (0);
 	}
+
+	if (!fragment_file.is_open())
+	{
+		std::cerr << "Failed to open fragment shader: " << fragment_path << std::endl;
+		return (0);
+	}
+
+	std::cout << "Shader files opened successfully" << std::endl;
 
 	std::stringstream	vertex_stream, fragment_stream;
 	vertex_stream << vertex_file.rdbuf();
@@ -45,11 +53,17 @@ GLuint	load_shader(const char *vertex_path, const char *fragment_path)
 	std::string	vertex_code = vertex_stream.str();
 	std::string	fragment_code = fragment_stream.str();
 
+	std::cout << "Vertex shader (" << vertex_code.length() << " bytes)" << std::endl;
+	std::cout << "Fragment shader (" << fragment_code.length() << " bytes)" << std::endl;
+
 	GLuint	vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_code.c_str());
-	GLuint	fragment_shader = compile_shader(GL_VERTEX_SHADER, fragment_code.c_str());
+	GLuint	fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fragment_code.c_str());
 
 	if (vertex_shader == 0 || fragment_shader == 0)
+	{
+		std::cerr << "Shader compilation failed" << std::endl;
 		return (0);
+	}
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vertex_shader);
@@ -65,6 +79,8 @@ GLuint	load_shader(const char *vertex_path, const char *fragment_path)
 		std::cerr << "Shader linking error:\n" << info_log << std::endl;
 		return (0);
 	}
+
+	std::cout << "Shader program linked successfully" << std::endl;
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
