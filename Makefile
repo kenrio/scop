@@ -1,0 +1,2 @@
+NAME	:= scop
+
