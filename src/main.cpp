@@ -154,4 +154,3 @@ int	main(void)
 	std::cout << "Program terminated successfully" << std::endl;
 	return (0);
 }
-
