@@ -5,8 +5,7 @@
 NAME		:= scop
 
 CXX_C		:= c++
-CXX_FLAGS	:= -Wall -Wextra 
-# CXX_FLAGS	:= -Wall -Wextra -Werror
+CXX_FLAGS	:= -Wall -Wextra -Werror
 
 CXX_FLAGS	+= -g3 -O0
 
@@ -31,9 +30,6 @@ BIN		:= \
 # **************************************************************************** #
 # LIBRARIES & FRAMEWORKS
 
-
-# MLX_DIR		:= minilibx-linux
-# MLX_LIB		:= $(MLX_DIR)/libmlx.a
 
 GL_FLAGS	:= -lGLEW -lGL -lGLU
 GLFW_FLAGS	:= -lglfw
@@ -65,9 +61,6 @@ $(NAME): $(BIN)
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX_C) $(CXX_FLAGS) $(INCLUDE) -c $< -o $@
-
-# $(MLX_LIB):
-# 	$(MAKE) -C $(MLX_DIR)
 
 clean:
 	$(RM) -rf $(BIN_DIR)
