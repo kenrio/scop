@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Vec3.hpp"
+#include "math/Vec3.hpp"
 
 class	ObjParser
 {

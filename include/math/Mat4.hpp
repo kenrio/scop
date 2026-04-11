@@ -14,7 +14,7 @@ struct Mat4
 	Mat4	operator*(const Mat4 &m) const;
 	Vec4	operator*(const Vec4 &v) const;
 
-	float *	value_ptr(void);
+	float const *	value_ptr(void) const;
 
 	static Mat4	translate(const Mat4 &m, const Vec3 &v);
 	static Mat4	rotate(const Mat4 &m, float angle, const Vec3 &axis);

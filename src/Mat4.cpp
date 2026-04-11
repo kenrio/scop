@@ -1,4 +1,4 @@
-#include "Mat4.hpp"
+#include "math/Mat4.hpp"
 
 Mat4::Mat4()
 {
@@ -23,7 +23,7 @@ Mat4	Mat4::identity(void)
 	return (m);
 }
 
-float *	Mat4::value_ptr(void)
+float const *	Mat4::value_ptr(void) const
 {
 	return (&data[0][0]);
 }
