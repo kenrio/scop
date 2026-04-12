@@ -87,7 +87,7 @@ int	main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Mat4	view = Mat4::identity();
-		view = Mat4::translate(view, Vec3(0.0f, 0.0f, -15.0f));
+		view = Mat4::translate(view, Vec3(0.0f, 0.0f, -5.0f));
 		Mat4	projection = Mat4::perspective(0.785f, 800.0f/600.f, 0.1f, 100.0f);
 
 		shader.use();
@@ -98,8 +98,7 @@ int	main(void)
 		glBindVertexArray(VAO);
 		Mat4	model = Mat4::identity();
 
-		model = Mat4::translate(model, Vec3(0.0f, 0.0f, 0.0f));
-		model = Mat4::rotate(model, -90, Vec3(0.0f, 1.0f, 0.0f));
+		model = Mat4::rotate(model, (float)glfwGetTime() * -1.0f, Vec3(0.0f, 1.0f, 0.0f));
 		
 		shader.setMat4("model", model);
 

@@ -15,12 +15,15 @@ public:
 
 	std::vector<float> const		&getVertices(void) const;
 	std::vector<unsigned int> const	&getIndices(void) const;
+	Vec3							getCenter(void) const;
 
 private:
 
-	std::vector<Vec3>			positions;
-	std::vector<float>			vertices;
-	std::vector<unsigned int>	indices;
+	std::vector<Vec3>						positions;
+	std::vector<float>						vertices;
+	std::vector<std::vector<unsigned int>>	faces;
+	std::vector<unsigned int>				indices;
+	Vec3									center;
 
 	void	parse(std::string const &filepath);
 	void	parseFace(std::string const &line);

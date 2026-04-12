@@ -15,6 +15,18 @@ std::vector<unsigned int> const &	ObjParser::getIndices(void) const
 	return (indices);
 }
 
+Vec3	ObjParser::getCenter(void) const
+{
+	Vec3	center;
+
+	for (size_t i = 0; i < positions.size(); ++i)
+		center = center + positions[i];
+
+	float	n = static_cast<float>(positions.size());
+
+	return (Vec3(center.x / n, center.y / n, center.z / n));
+}
+
 void	ObjParser::parse(std::string const &filepath)
 {
 	std::ifstream	file(filepath);
@@ -47,6 +59,11 @@ void	ObjParser::parse(std::string const &filepath)
 			parseFace(line);
 	}
 	file.close();
+
+	center = getCenter();
+
+	for (size_t i = 0; i < positions.size(); ++i)
+		positions[i] = positions[i] - center;
 
 	for (size_t i = 0; i < positions.size(); ++i)
 	{
