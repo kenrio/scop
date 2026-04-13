@@ -29,6 +29,7 @@ SRC		:= \
 		Vec4.cpp \
 		Mat4.cpp \
 		ObjParser.cpp \
+		KeyInputHandler.cpp \
 		Shader.cpp \
 
 C_SRC	:= \

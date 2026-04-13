@@ -6,10 +6,10 @@
 
 #include "Math.hpp"
 #include "ObjParser.hpp"
+#include "KeyInputHandler.hpp"
 #include "Shader.hpp"
 
 void	framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void	processInput(GLFWwindow *window);
 
 int	main(void)
 {
@@ -52,8 +52,8 @@ int	main(void)
 	unsigned int	VBO;
 	glGenBuffers(1, &VBO);
 
-	unsigned int	EBO;
-	glGenBuffers(1, &EBO);
+	// unsigned int	EBO;
+	// glGenBuffers(1, &EBO);
 
 	unsigned int	VAO;
 	glGenVertexArrays(1, &VAO);
@@ -64,14 +64,21 @@ int	main(void)
 	std::vector<float> const &vertices = objParser.getVertices();
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	std::vector<unsigned int> const &indices = objParser.getIndices();
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	// std::vector<unsigned int> const &indices = objParser.getIndices();
+	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
 	glBindVertexArray(0);
+
+	KeyInputHandler	keyInput(window);
+	Vec3			objPos(0.0f, 0.0f, 0.0f);
+	float			moveSpeed = 0.01f;
 
 	Shader	shader("shaders/vertex.glsl", "shaders/fragment.glsl");
 	shader.use();
@@ -79,9 +86,21 @@ int	main(void)
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	while (!glfwWindowShouldClose(window))
+	while (!keyInput.shouldClose())
 	{
-		processInput(window);
+		keyInput.update();
+
+		if (keyInput.isPressed(GLFW_KEY_ESCAPE))
+		{
+			glfwSetWindowShouldClose(window, true);
+			break ;
+		}
+		if (keyInput.isPressed(GLFW_KEY_W)) objPos.z -= moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_S)) objPos.z += moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_A)) objPos.x -= moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_D)) objPos.x += moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_Q)) objPos.y -= moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_E)) objPos.y += moveSpeed;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -98,14 +117,17 @@ int	main(void)
 		glBindVertexArray(VAO);
 		Mat4	model = Mat4::identity();
 
+		model = Mat4::translate(model, objPos);
 		model = Mat4::rotate(model, (float)glfwGetTime() * -1.0f, Vec3(0.0f, 1.0f, 0.0f));
+		// model = Mat4::rotate(model, -1.6f, Vec3(0.0f, 1.0f, 0.0f));
 		
 		shader.setMat4("model", model);
 
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+		// glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
-		glfwPollEvents();
+
 	}
 
 	glfwTerminate();
@@ -117,14 +139,6 @@ void	framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	(void)window;
 	glViewport(0, 0, width, height);
-
-	return ;
-}
-
-void	processInput(GLFWwindow *window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
 
 	return ;
 }
