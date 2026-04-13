@@ -65,11 +65,26 @@ void	ObjParser::parse(std::string const &filepath)
 	for (size_t i = 0; i < positions.size(); ++i)
 		positions[i] = positions[i] - center;
 
-	for (size_t i = 0; i < positions.size(); ++i)
+	// for (size_t i = 0; i < positions.size(); ++i)
+	// {
+	// 	vertices.push_back(positions[i].x);
+	// 	vertices.push_back(positions[i].y);
+	// 	vertices.push_back(positions[i].z);
+	// }
+
+	for (size_t i = 0; i < faces.size(); ++i)
 	{
-		vertices.push_back(positions[i].x);
-		vertices.push_back(positions[i].y);
-		vertices.push_back(positions[i].z);
+		float	gray = static_cast<float>(i) / faces.size();
+		for (int j = 0; j < 3; ++j)
+		{
+			Vec3	&pos = positions[faces[i][j]];
+			vertices.push_back(pos.x);
+			vertices.push_back(pos.y);
+			vertices.push_back(pos.z);
+			vertices.push_back(gray);
+			vertices.push_back(gray);
+			vertices.push_back(gray);
+		}
 	}
 
 	return ;
@@ -93,6 +108,9 @@ void	ObjParser::parseFace(std::string const &line)
 		indices.push_back(faceIndices[0]);
 		indices.push_back(faceIndices[i]);
 		indices.push_back(faceIndices[i + 1]);
+
+		std::vector<unsigned int>	triangle = {faceIndices[0], faceIndices[i], faceIndices[i + 1]};
+		faces.push_back(triangle);
 	}
 
 	return ;
