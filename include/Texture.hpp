@@ -2,10 +2,11 @@
 # define TEXTURE_HPP
 
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <cstring>
 
 #include "glad/glad.h"
-#include "stb_image/stb_image.h"
 
 class Texture
 {
@@ -22,7 +23,8 @@ public:
 	void	unbind(void) const;	
 
 private:
-	void	load(const std::string &path, bool generateMipmap);
+	void			load(const std::string &path, bool generateMipmap);
+	unsigned char *	loadBMP(const std::string &path, int &width, int &height, int &channels);
 
 };
 

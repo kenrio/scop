@@ -32,12 +32,11 @@ void	Texture::load(const std::string &path, bool generateMipmap)
 					generateMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	stbi_set_flip_vertically_on_load(true);
-
 	int	width, height, nrChannels;
 	unsigned char	*data;
 
-	data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	data = loadBMP(path, width, height, nrChannels);
+
 	if (data)
 	{
 		GLenum	format = 0;
@@ -56,6 +55,73 @@ void	Texture::load(const std::string &path, bool generateMipmap)
 	else
 		std::cerr << "Failed to load texture: " << path << std::endl;
 
-	stbi_image_free(data);
+	delete[] data;
+
 	return ;
+}
+
+unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &height, int &channels)
+{
+	std::ifstream	file(path, std::ios::binary);
+
+	if (!file.is_open())
+	{
+		std::cerr << "Failed to open BMP: " << path << std::endl;
+		return (NULL);
+	}
+
+	unsigned char	header[54];
+	file.read(reinterpret_cast<char *>(header), 54);
+
+	if (header[0] != 'B' || header[1] != 'M')
+	{
+		std::cerr << "Not a BMP file: " << path << std::endl;
+		return (NULL);
+	}
+
+	int	dataOffset = *(int *)&header[10];
+	width = *(int *)&header[18];
+	height = *(int *)&header[22];
+	bool	topDown = (height < 0);
+	if (height < 0)
+		height = -height;
+	int	bitsPerPx = *(short *)&header[28];
+
+	channels = bitsPerPx / 8;
+	
+	file.seekg(dataOffset);
+	int				dataSize = width * 	height * channels;
+	unsigned char	*data = new unsigned char[dataSize];
+	file.read(reinterpret_cast<char *>(data), dataSize);
+	file.close();
+	
+	std::cout << "BMP width: " << width << std::endl;
+	std::cout << "BMP height: " << height << std::endl;
+	std::cout << "BMP bitsPerPx: " << bitsPerPx << std::endl;
+	std::cout << "BMP dataOffset: " << dataOffset << std::endl;
+	std::cout << "BMP dataSize: " << dataSize << std::endl;
+
+	for (int i = 0; i < dataSize; i += channels)
+	{
+		unsigned char tmp = data[i];
+		data[i] = data[i + 2];
+		data[i + 2] = tmp;
+	}
+
+	if (topDown)
+	{
+		int rowSize = width * channels;
+		unsigned char *tmp = new unsigned char[rowSize];
+		for (int y = 0; y < height / 2; y++)
+		{
+			int topRow = y * rowSize;
+			int bottomRow = (height - 1 - y) * rowSize;
+			std::memcpy(tmp, &data[topRow], rowSize);
+			std::memcpy(&data[topRow], &data[bottomRow], rowSize);
+			std::memcpy(&data[bottomRow], tmp, rowSize);
+		}
+		delete[] tmp;
+	}
+
+	return (data);
 }
