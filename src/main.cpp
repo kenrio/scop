@@ -46,9 +46,9 @@ int	main(void)
 	std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-	std::cout << "=========================" << std::endl;
+	std::cout << "==========================" << std::endl;
 
-	ObjParser	objParser("resources/42.obj");
+	ObjParser	objParser("resources/teapot.obj");
 
 	unsigned int	VBO;
 	glGenBuffers(1, &VBO);
@@ -80,7 +80,8 @@ int	main(void)
 
 	glBindVertexArray(0);
 
-	Texture	texture("resources/myLittlePoneys.png");
+	Texture	texture("resources/myLittlePoneys.bmp");
+
 	float	mixValue = 0.0f;
 	bool	textureMode = false;
 	bool	tKeyPressed = false;
