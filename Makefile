@@ -32,6 +32,7 @@ SRC		:= \
 		KeyInputHandler.cpp \
 		Shader.cpp \
 		Texture.cpp \
+		ModelViewer.cpp \
 
 C_SRC	:= \
 		glad.c \
