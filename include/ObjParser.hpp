@@ -1,3 +1,6 @@
+# ifndef OBJPARSER_HPP
+# define OBJPARSER_HPP
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -29,3 +32,5 @@ private:
 	void	parseFace(std::string const &line);
 
 };
+
+#endif
