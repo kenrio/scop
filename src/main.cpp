@@ -1,5 +1,5 @@
-#include <unistd.h>
 #include <iostream>
+#include <string>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -10,17 +10,43 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 
+const float			WINDOW_WIDTH = 800.0f;
+const float			WINDOW_HEIGHT = 600.0f;
+const std::string	WINDOW_TITLE = "scop";
+
+const float		FOV = 0.785f;
+const float		NEAR_PLANE = 0.1f;
+const float		FAR_PLANE = 100.0f;
+const float		CAMERA_DIST = -5.0f;
+
+const float		MOVE_SPEED = 0.01f;
+const float		MIX_SPEED = 0.01f;
+
+const int		VERTEX_STRIDE = 8;
+
+const std::string	TEXTURE_PATH = "resources/myLittlePoneys.bmp";
+const std::string	VERTEX_SHADER = "shaders/vertex.glsl";
+const std::string	FRAGMENT_SHADER = "shaders/fragment.glsl";
+
 void	framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
-int	main(void)
+int	main(int argc, char *argv[])
 {
+	if (argc < 2)
+	{
+		std::cerr << "Usage: ./scop <obj_file_path>" << std::endl;
+		return (1);
+	}
+
+	std::string	objPath = argv[1];
+
 	glfwInitHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_FALSE);
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow	*window = glfwCreateWindow(800, 600, "scop", NULL, NULL);
+	GLFWwindow	*window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE.c_str(), NULL, NULL);
 	if (!window)
 	{
 		std::cerr << "Failed to create GLFW window" << std::endl;
@@ -48,13 +74,10 @@ int	main(void)
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 	std::cout << "==========================" << std::endl;
 
-	ObjParser	objParser("resources/teapot.obj");
+	ObjParser	objParser(objPath);
 
 	unsigned int	VBO;
 	glGenBuffers(1, &VBO);
-
-	// unsigned int	EBO;
-	// glGenBuffers(1, &EBO);
 
 	unsigned int	VAO;
 	glGenVertexArrays(1, &VAO);
@@ -65,22 +88,18 @@ int	main(void)
 	std::vector<float> const &vertices = objParser.getVertices();
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	// std::vector<unsigned int> const &indices = objParser.getIndices();
-	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);
 
-	Texture	texture("resources/myLittlePoneys.bmp");
+	Texture	texture(TEXTURE_PATH);
 
 	float	mixValue = 0.0f;
 	bool	textureMode = false;
@@ -88,9 +107,9 @@ int	main(void)
 
 	KeyInputHandler	keyInput(window);
 	Vec3			objPos(0.0f, 0.0f, 0.0f);
-	float			moveSpeed = 0.01f;
+	float			moveSpeed = MOVE_SPEED;
 
-	Shader	shader("shaders/vertex.glsl", "shaders/fragment.glsl");
+	Shader	shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader.use();
 
 	glEnable(GL_DEPTH_TEST);
@@ -126,13 +145,13 @@ int	main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Mat4	view = Mat4::identity();
-		view = Mat4::translate(view, Vec3(0.0f, 0.0f, -5.0f));
-		Mat4	projection = Mat4::perspective(0.785f, 800.0f/600.f, 0.1f, 100.0f);
+		view = Mat4::translate(view, Vec3(0.0f, 0.0f, CAMERA_DIST));
+		Mat4	projection = Mat4::perspective(FOV, WINDOW_WIDTH / WINDOW_HEIGHT, NEAR_PLANE, FAR_PLANE);
 
 		if (textureMode && mixValue < 1.0f)
-			mixValue += 0.01f;
+			mixValue += MIX_SPEED;
 		else if (!textureMode && mixValue > 0.0f)
-			mixValue -= 0.01f;
+			mixValue -= MIX_SPEED;
 
 		shader.use();
 
@@ -148,12 +167,10 @@ int	main(void)
 
 		model = Mat4::translate(model, objPos);
 		model = Mat4::rotate(model, (float)glfwGetTime() * -1.0f, Vec3(0.0f, 1.0f, 0.0f));
-		// model = Mat4::rotate(model, -1.6f, Vec3(0.0f, 1.0f, 0.0f));
 		
 		shader.setMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 8);
-		// glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size() / VERTEX_STRIDE);
 
 		glfwSwapBuffers(window);
 
