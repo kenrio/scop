@@ -8,6 +8,7 @@
 #include "ObjParser.hpp"
 #include "KeyInputHandler.hpp"
 #include "Shader.hpp"
+#include "Texture.hpp"
 
 void	framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -68,13 +69,21 @@ int	main(void)
 	// std::vector<unsigned int> const &indices = objParser.getIndices();
 	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
 	glBindVertexArray(0);
+
+	Texture	texture("resources/myLittlePoneys.png");
+	float	mixValue = 0.0f;
+	bool	textureMode = false;
+	bool	tKeyPressed = false;
 
 	KeyInputHandler	keyInput(window);
 	Vec3			objPos(0.0f, 0.0f, 0.0f);
@@ -101,6 +110,16 @@ int	main(void)
 		if (keyInput.isPressed(GLFW_KEY_D)) objPos.x += moveSpeed;
 		if (keyInput.isPressed(GLFW_KEY_Q)) objPos.y -= moveSpeed;
 		if (keyInput.isPressed(GLFW_KEY_E)) objPos.y += moveSpeed;
+		if (keyInput.isPressed(GLFW_KEY_T))
+		{
+			if (!tKeyPressed)
+			{
+				textureMode = !textureMode;
+				tKeyPressed = true;
+			}
+		}
+		else
+			tKeyPressed = false;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,10 +128,19 @@ int	main(void)
 		view = Mat4::translate(view, Vec3(0.0f, 0.0f, -5.0f));
 		Mat4	projection = Mat4::perspective(0.785f, 800.0f/600.f, 0.1f, 100.0f);
 
+		if (textureMode && mixValue < 1.0f)
+			mixValue += 0.01f;
+		else if (!textureMode && mixValue > 0.0f)
+			mixValue -= 0.01f;
+
 		shader.use();
 
+		shader.setFloat("mixValue", mixValue);
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
+
+		texture.bind(0);
+		shader.setInt("ourTexture", 0);
 
 		glBindVertexArray(VAO);
 		Mat4	model = Mat4::identity();
@@ -123,7 +151,7 @@ int	main(void)
 		
 		shader.setMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 8);
 		// glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);

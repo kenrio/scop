@@ -31,6 +31,8 @@ SRC		:= \
 		ObjParser.cpp \
 		KeyInputHandler.cpp \
 		Shader.cpp \
+		Texture.cpp \
+		stb_image.cpp \
 
 C_SRC	:= \
 		glad.c \
