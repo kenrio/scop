@@ -14,10 +14,10 @@ const std::string	WINDOW_TITLE = "scop";
 
 const float		FOV = 0.785f;
 const float		NEAR_PLANE = 0.1f;
-const float		FAR_PLANE = 100.0f;
+const float		FAR_PLANE = 1000.0f;
 const float		CAMERA_DIST = -5.0f;
 
-const float		MOVE_SPEED = 0.01f;
+const float		MOVE_SPEED = 0.02f;
 const float		MIX_SPEED = 0.01f;
 
 const int		VERTEX_STRIDE = 8;
