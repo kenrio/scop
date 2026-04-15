@@ -70,7 +70,9 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 		return (NULL);
 	}
 
+	// バイナリデータを1バイト単位で扱えるよに unsigned char で格納
 	unsigned char	header[54];
+	// メモリの中身を変えない、型の解釈だけを変えるキャスト
 	file.read(reinterpret_cast<char *>(header), 54);
 
 	if (header[0] != 'B' || header[1] != 'M')
@@ -79,6 +81,9 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 		return (NULL);
 	}
 
+	// &header[10]→headerの10バイト目のアドレス
+	// (int *)→intのポイントとして扱う
+	// *→そのアドレスから4バイト(int分)を読み
 	int	dataOffset = *(int *)&header[10];
 	width = *(int *)&header[18];
 	height = *(int *)&header[22];
@@ -89,18 +94,14 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 
 	channels = bitsPerPx / 8;
 	
-	file.seekg(dataOffset);
+	file.seekg(dataOffset); // ファイルの読み取り位置をdataOffset分移動
 	int				dataSize = width * 	height * channels;
 	unsigned char	*data = new unsigned char[dataSize];
+
 	file.read(reinterpret_cast<char *>(data), dataSize);
 	file.close();
-	
-	std::cout << "BMP width: " << width << std::endl;
-	std::cout << "BMP height: " << height << std::endl;
-	std::cout << "BMP bitsPerPx: " << bitsPerPx << std::endl;
-	std::cout << "BMP dataOffset: " << dataOffset << std::endl;
-	std::cout << "BMP dataSize: " << dataSize << std::endl;
 
+	// ピクセルの並び順を [B, G, R] から [R, G, B] に変換（RとBを入れ替える）
 	for (int i = 0; i < dataSize; i += channels)
 	{
 		unsigned char tmp = data[i];
@@ -108,11 +109,12 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 		data[i + 2] = tmp;
 	}
 
+	// 1行ずつ上と下を入れ替える
 	if (topDown)
 	{
 		int rowSize = width * channels;
 		unsigned char *tmp = new unsigned char[rowSize];
-		for (int y = 0; y < height / 2; y++)
+		for (int y = 0; y < height / 2; ++y)
 		{
 			int topRow = y * rowSize;
 			int bottomRow = (height - 1 - y) * rowSize;
