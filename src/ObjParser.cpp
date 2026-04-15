@@ -68,26 +68,9 @@ void	ObjParser::parse(std::string const &filepath)
 	for (size_t i = 0; i < positions.size(); ++i)
 		positions[i] = positions[i] - center;
 
-	// for (size_t i = 0; i < positions.size(); ++i)
-	// {
-	// 	vertices.push_back(positions[i].x);
-	// 	vertices.push_back(positions[i].y);
-	// 	vertices.push_back(positions[i].z);
-	// }
-
 	for (size_t i = 0; i < faces.size(); ++i)
 	{
 		float	gray = static_cast<float>(i) / faces.size();
-
-		// Vec3	v0 = positions[faces[i][0]];
-		// Vec3	v1 = positions[faces[i][1]];
-		// Vec3	v2 = positions[faces[i][2]];
-
-		// Vec3	normal = Vec3::cross(v1 - v0, v2 - v0).normalize();
-
-		// float	ax = std::abs(normal.x);
-		// float	ay = std::abs(normal.y);
-		// float	az = std::abs(normal.z);
 
 		for (int j = 0; j < 3; ++j)
 		{
@@ -101,22 +84,6 @@ void	ObjParser::parse(std::string const &filepath)
 			vertices.push_back(gray);
 			vertices.push_back(pos.z);
 			vertices.push_back(pos.y);
-
-			// if (ax >= ay && ax >= az)
-			// {
-			// 	vertices.push_back(pos.z);
-			// 	vertices.push_back(pos.y);
-			// }
-			// else if (ay >= ax && ay >= az)
-			// {
-			// 	vertices.push_back(pos.z);
-			// 	vertices.push_back(pos.x);
-			// }
-			// else
-			// {
-			// 	vertices.push_back(pos.y);
-			// 	vertices.push_back(pos.x);
-			// }
 		}
 	}
 

@@ -42,10 +42,11 @@ private:
 
 	unsigned int	VAO;
 	unsigned int	VBO;
+
 	Shader *		shader;
 	Texture *		texture;
-
 	KeyInputHandler *	keyInput;
+
 	Vec3				objPos;
 	float				mixValue;
 	bool				textureMode;

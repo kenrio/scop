@@ -9,8 +9,6 @@ UNAME		:= $(shell uname -s)
 CXX_C		:= c++
 CXX_FLAGS	:= -Wall -Wextra -Werror
 
-# CXX_FLAGS	+= -g3 -O0
-
 CC			:= gcc
 C_FLAGS		:= -Wall -Wextra -Werror
 
@@ -52,8 +50,6 @@ C_BIN	:= \
 
 GL_FLAGS	:= -framework OpenGL
 GLFW_FLAGS	:= -lglfw
-
-# X11_FLAGS	:= -lX11
 
 LDFLAGS		:= -L/opt/homebrew/lib $(GL_FLAGS) $(GLFW_FLAGS)
 
