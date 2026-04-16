@@ -58,6 +58,12 @@ void	ObjParser::parse(std::string const &filepath)
 			iss >> x >> y >> z;
 			positions.push_back(Vec3(x, y, z));
 		}
+		else if (prefix == "vn")
+		{
+			float	x, y, z;
+			iss >> x >> y >> z;
+			normals.push_back(Vec3(x, y, z));
+		}
 		else if (prefix == "f")
 			parseFace(line);
 	}
@@ -68,22 +74,46 @@ void	ObjParser::parse(std::string const &filepath)
 	for (size_t i = 0; i < positions.size(); ++i)
 		positions[i] = positions[i] - center;
 
-	for (size_t i = 0; i < faces.size(); ++i)
+	for (size_t i = 0; i < faces.size(); i += 3)
 	{
-		float	gray = static_cast<float>(i) / faces.size();
+		float	gray = static_cast<float>(i / 3) / (faces.size() / 3);
+
+		bool	hasAllNormals =
+				faces[i].vn >= 0 &&
+				faces[i + 1].vn >= 0 &&
+				faces[i + 2].vn >= 0;
+
+		Vec3	faceNormal;
+		if (!hasAllNormals)
+		{
+			Vec3	&posA = positions[faces[i].v];
+			Vec3	&posB = positions[faces[i + 1].v];
+			Vec3	&posC = positions[faces[i + 2].v];
+			faceNormal = Vec3::cross(posB - posA, posC - posA).normalize();
+		}
+
 
 		for (int j = 0; j < 3; ++j)
 		{
-			Vec3	&pos = positions[faces[i][j]];
+			FaceVertex	&fv = faces[i + j];
+			Vec3		&pos = positions[fv.v];
+
+			Vec3	normal = (hasAllNormals) ? normals[fv.vn] : faceNormal;
 
 			vertices.push_back(pos.x);
 			vertices.push_back(pos.y);
 			vertices.push_back(pos.z);
+
 			vertices.push_back(gray);
 			vertices.push_back(gray);
 			vertices.push_back(gray);
+
 			vertices.push_back(pos.z);
 			vertices.push_back(pos.y);
+
+			vertices.push_back(normal.x);
+			vertices.push_back(normal.y);
+			vertices.push_back(normal.z);
 		}
 	}
 
@@ -97,25 +127,48 @@ void	ObjParser::parseFace(std::string const &line)
 
 	iss >> prefix;
 
-	std::vector<unsigned int>	faceIndices;
+	std::vector<FaceVertex>		faceVertices;
 	std::string					token;
 	
 	while (iss >> token)
 	{
-		std::string		indexStr = token.substr(0, token.find('/'));
-		unsigned int	index = std::stoi(indexStr);
-		faceIndices.push_back(index - 1);
+		FaceVertex	fv;
+		parseVertexToken(token, fv.v, fv.vt, fv.vn);
+		faceVertices.push_back(fv);
 	}
 
-	for (size_t i = 1; i + 1 < faceIndices.size(); ++i)
+	// fan triangulation（扇形三角形分割）
+	for (size_t i = 1; i + 1 < faceVertices.size(); ++i)
 	{
-		indices.push_back(faceIndices[0]);
-		indices.push_back(faceIndices[i]);
-		indices.push_back(faceIndices[i + 1]);
+		faces.push_back(faceVertices[0]);
+		faces.push_back(faceVertices[i]);
+		faces.push_back(faceVertices[i + 1]);
 
-		std::vector<unsigned int>	triangle = {faceIndices[0], faceIndices[i], faceIndices[i + 1]};
-		faces.push_back(triangle);
+		indices.push_back(faceVertices[0].v);
+		indices.push_back(faceVertices[i].v);
+		indices.push_back(faceVertices[i + 1].v);
 	}
+
+	return ;
+}
+
+void	ObjParser::parseVertexToken(std::string const &token, int &vIdx, int &vtIdx, int &vnIdx)
+{
+	vIdx = -1;
+	vtIdx = -1;
+	vnIdx = -1;
+
+	std::istringstream	iss(token);
+	std::string			part;
+
+	if (std::getline(iss, part, '/') && !part.empty())
+		vIdx = std::stoi(part) - 1;
+
+	if (std::getline(iss, part, '/') && !part.empty())
+		vtIdx = std::stoi(part) - 1;
+
+	if (std::getline(iss, part, '/') && !part.empty())
+		vnIdx = std::stoi(part) - 1;
 
 	return ;
 }

@@ -20,7 +20,7 @@ const float		CAMERA_DIST = -5.0f;
 const float		MOVE_SPEED = 0.02f;
 const float		MIX_SPEED = 0.01f;
 
-const int		VERTEX_STRIDE = 8;
+const int		VERTEX_STRIDE = 11;
 
 const std::string	TEXTURE_PATH = "resources/myLittlePoneys.bmp";
 const std::string	VERTEX_SHADER = "shaders/vertex.glsl";

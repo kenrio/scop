@@ -9,6 +9,13 @@
 
 #include "math/Vec3.hpp"
 
+struct	FaceVertex
+{
+	int	v;
+	int	vt;
+	int	vn;
+};
+
 class	ObjParser
 {
 
@@ -22,14 +29,17 @@ public:
 
 private:
 
-	std::vector<Vec3>						positions;
-	std::vector<float>						vertices;
-	std::vector<std::vector<unsigned int>>	faces;
-	std::vector<unsigned int>				indices;
-	Vec3									center;
+	std::vector<Vec3>			positions;
+	std::vector<Vec3>			normals;
+	std::vector<Vec3>			texCoords;
+	std::vector<FaceVertex>		faces;
+	std::vector<float>			vertices;
+	std::vector<unsigned int>	indices;
+	Vec3						center;
 
 	void	parse(std::string const &filepath);
 	void	parseFace(std::string const &line);
+	void	parseVertexToken(std::string const &token, int &vIdx, int &vtIdx, int &vnIdx);
 
 };
 

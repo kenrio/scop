@@ -110,6 +110,9 @@ void	ModelViewer::setBuffers(const ObjParser &parser)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+
 	glBindVertexArray(0);
 
 	return ;
