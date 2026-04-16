@@ -18,6 +18,10 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	lightingMode = false;
 	lKeyPressed = false;
 
+	uvModeValue = 0.0f;
+	uvMode = false;
+	uKeyPressed = false;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -114,8 +118,11 @@ void	ModelViewer::setBuffers(const ObjParser &parser)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(8 * sizeof(float)));
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(8 * sizeof(float)));
 	glEnableVertexAttribArray(3);
+
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)(10 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 
 	glBindVertexArray(0);
 
@@ -158,6 +165,17 @@ void	ModelViewer::processInput(void)
 	else
 		lKeyPressed = false;
 
+	if (keyInput->isPressed(GLFW_KEY_U))
+	{
+		if (!uKeyPressed)
+		{
+			uvMode = !uvMode;
+			uKeyPressed = true;
+		}
+	}
+	else
+		uKeyPressed = false;
+
 	return ;
 }
 
@@ -180,6 +198,11 @@ void	ModelViewer::render(void)
 	else if (!lightingMode && lightingValue > 0.0f)
 		lightingValue -= MIX_SPEED;
 
+	if (uvMode && uvModeValue < 1.0f)
+		uvModeValue += MIX_SPEED;
+	else if (!uvMode && uvModeValue > 0.0f)
+		uvModeValue -= MIX_SPEED;
+
 	shader->use();
 
 	shader->setFloat("mixValue", mixValue);
@@ -189,6 +212,7 @@ void	ModelViewer::render(void)
 	texture->bind(0);
 	shader->setInt("ourTexture", 0);
 	shader->setFloat("lightingValue", lightingValue);
+	shader->setFloat("uvMode", uvModeValue);
 
 	glBindVertexArray(VAO);
 	Mat4	model = Mat4::identity();

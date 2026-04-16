@@ -6,6 +6,7 @@ ObjParser::ObjParser(std::string const &filepath)
 	std::cout << "Positions: " << positions.size() << std::endl;
     std::cout << "Faces: " << faces.size() << std::endl;
     std::cout << "Vertices: " << vertices.size() << std::endl;
+	std::cout << "TexCoords: " << texCoords.size() << std::endl;
 }
 
 std::vector<float> const &	ObjParser::getVertices(void) const
@@ -64,6 +65,12 @@ void	ObjParser::parse(std::string const &filepath)
 			iss >> x >> y >> z;
 			normals.push_back(Vec3(x, y, z));
 		}
+		else if (prefix == "vt")
+		{
+			float	u, v;
+			iss >> u >> v;
+			texCoords.push_back(Vec3(u, v, 0.0f));
+		}
 		else if (prefix == "f")
 			parseFace(line);
 	}
@@ -100,6 +107,10 @@ void	ObjParser::parse(std::string const &filepath)
 
 			Vec3	normal = (hasAllNormals) ? normals[fv.vn] : faceNormal;
 
+			Vec3	uv(0.0f, 0.0f, 0.0f);
+			if (fv.vt >= 0 && fv.vt < (int)texCoords.size())
+				uv = texCoords[fv.vt];
+
 			vertices.push_back(pos.x);
 			vertices.push_back(pos.y);
 			vertices.push_back(pos.z);
@@ -110,6 +121,9 @@ void	ObjParser::parse(std::string const &filepath)
 
 			vertices.push_back(pos.z);
 			vertices.push_back(pos.y);
+
+			vertices.push_back(uv.x);
+			vertices.push_back(uv.y);
 
 			vertices.push_back(normal.x);
 			vertices.push_back(normal.y);

@@ -4,14 +4,18 @@ out vec4	FragColor;
 
 in vec3	ourColor;
 in vec2	texCoord;
+in vec2	objUV;
 in vec3	normal;
 
 uniform sampler2D	ourTexture;
 uniform float		mixValue;
 uniform float		lightingValue;
+uniform float		uvMode;
 
 void main()
 {
+	vec2	finalUV = mix(texCoord, objUV, uvMode);
+
 	vec3	lightDir = normalize(vec3(0.5, 1.0, 0.8));
 	vec3	norm = normalize(normal);
 	float	diff = max(dot(norm, lightDir), 0.0);
@@ -20,6 +24,6 @@ void main()
 	float	lighting = mix(1.0, dynamicLighting, lightingValue);
 
 	vec4	color = vec4(ourColor * lighting, 1.0);
-	vec4	tex = texture(ourTexture, texCoord) * vec4(vec3(lighting), 1.0);
+	vec4	tex = texture(ourTexture, finalUV) * vec4(vec3(lighting), 1.0);
 	FragColor = mix(color, tex, mixValue);
 }
