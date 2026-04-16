@@ -98,10 +98,14 @@ void	ObjParser::parseFace(std::string const &line)
 	iss >> prefix;
 
 	std::vector<unsigned int>	faceIndices;
-	unsigned int				index;
-
-	while (iss >> index)
+	std::string					token;
+	
+	while (iss >> token)
+	{
+		std::string		indexStr = token.substr(0, token.find('/'));
+		unsigned int	index = std::stoi(indexStr);
 		faceIndices.push_back(index - 1);
+	}
 
 	for (size_t i = 1; i + 1 < faceIndices.size(); ++i)
 	{
