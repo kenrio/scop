@@ -43,15 +43,21 @@ private:
 	unsigned int	VAO;
 	unsigned int	VBO;
 
-	Shader *		shader;
-	Texture *		texture;
+	Shader *			shader;
+	Texture *			texture;
 	KeyInputHandler *	keyInput;
 
-	Vec3				objPos;
-	float				mixValue;
-	bool				textureMode;
-	bool				tKeyPressed;
-	int					vertexCount;
+	Vec3	objPos;
+
+	float	mixValue;
+	bool	textureMode;
+	bool	tKeyPressed;
+
+	float	lightingValue;
+	bool	lightingMode;
+	bool	lKeyPressed;
+
+	int		vertexCount;
 
 	void	initWindow(void);
 	void	initGL(void);

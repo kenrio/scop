@@ -14,6 +14,10 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	textureMode = false;
 	tKeyPressed = false;
 
+	lightingValue = 0.0f;
+	lightingMode = false;
+	lKeyPressed = false;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -143,6 +147,17 @@ void	ModelViewer::processInput(void)
 	else
 		tKeyPressed = false;
 
+	if (keyInput->isPressed(GLFW_KEY_L))
+	{
+		if (!lKeyPressed)
+		{
+			lightingMode = !lightingMode;
+			lKeyPressed = true;
+		}
+	}
+	else
+		lKeyPressed = false;
+
 	return ;
 }
 
@@ -160,6 +175,11 @@ void	ModelViewer::render(void)
 	else if (!textureMode && mixValue > 0.0f)
 		mixValue -= MIX_SPEED;
 
+	if (lightingMode && lightingValue < 1.0f)
+		lightingValue += MIX_SPEED;
+	else if (!lightingMode && lightingValue > 0.0f)
+		lightingValue -= MIX_SPEED;
+
 	shader->use();
 
 	shader->setFloat("mixValue", mixValue);
@@ -168,6 +188,7 @@ void	ModelViewer::render(void)
 
 	texture->bind(0);
 	shader->setInt("ourTexture", 0);
+	shader->setFloat("lightingValue", lightingValue);
 
 	glBindVertexArray(VAO);
 	Mat4	model = Mat4::identity();
