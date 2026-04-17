@@ -22,7 +22,7 @@ const float		MIX_SPEED = 0.01f;
 
 const int		VERTEX_STRIDE = 13;
 
-const std::string	TEXTURE_PATH = "resources/myLittlePoneys.bmp";
+const std::string	TEXTURE_PATH = "resources/snoutBeetle.bmp";
 const std::string	VERTEX_SHADER = "shaders/vertex.glsl";
 const std::string	FRAGMENT_SHADER = "shaders/fragment.glsl";
 

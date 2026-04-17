@@ -91,15 +91,29 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 	if (height < 0)
 		height = -height;
 	int	bitsPerPx = *(short *)&header[28];
-
+	
 	channels = bitsPerPx / 8;
 	
 	file.seekg(dataOffset); // ファイルの読み取り位置をdataOffset分移動
 	int				dataSize = width * 	height * channels;
 	unsigned char	*data = new unsigned char[dataSize];
-
+	
 	file.read(reinterpret_cast<char *>(data), dataSize);
 	file.close();
+
+	// std::cout << "dataOffset: " << dataOffset << std::endl;
+
+	// int imageSize = *(int *)&header[34];
+	// int expectedSize = width * height * channels;
+	// std::cout << "BMP imageSize in header: " << imageSize << std::endl;
+	// std::cout << "Expected size: " << expectedSize << std::endl;
+
+	// std::cout << "BMP: " << width << "x" << height 
+    //       << " channels=" << channels 
+    //       << " bitsPerPx=" << bitsPerPx << std::endl;
+
+	// std::cout << "height raw: " << *(int *)&header[22] << std::endl;
+	// std::cout << "topDown: " << topDown << std::endl;
 
 	// ピクセルの並び順を [B, G, R] から [R, G, B] に変換（RとBを入れ替える）
 	for (int i = 0; i < dataSize; i += channels)
