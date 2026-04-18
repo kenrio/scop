@@ -267,7 +267,11 @@ void	ModelViewer::render(void)
 
 	Mat4	view = Mat4::identity();
 	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
-	Mat4	projection = Mat4::perspective(FOV, WINDOW_WIDTH / WINDOW_HEIGHT, NEAR_PLANE, FAR_PLANE);
+
+	int		width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	float	aspect = (float)width / (float)height;
+	Mat4	projection = Mat4::perspective(FOV, aspect, NEAR_PLANE, FAR_PLANE);
 
 	if (textureMode && mixValue < 1.0f)
 		mixValue += MIX_SPEED;

@@ -3,10 +3,10 @@
 ObjParser::ObjParser(std::string const &filepath)
 {
 	parse(filepath);
-	std::cout << "Positions: " << positions.size() << std::endl;
-    std::cout << "Faces: " << faces.size() << std::endl;
-    std::cout << "Vertices: " << vertices.size() << std::endl;
-	std::cout << "TexCoords: " << texCoords.size() << std::endl;
+	// std::cout << "Positions: " << positions.size() << std::endl;
+    // std::cout << "Faces: " << faces.size() << std::endl;
+    // std::cout << "Vertices: " << vertices.size() << std::endl;
+	// std::cout << "TexCoords: " << texCoords.size() << std::endl;
 }
 
 std::vector<float> const &	ObjParser::getVertices(void) const
