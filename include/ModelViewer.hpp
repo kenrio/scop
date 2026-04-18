@@ -73,6 +73,8 @@ private:
 	float	mouseLastY;
 	bool	mouseDragging;
 
+	float	zoom;
+
 	void	initWindow(void);
 	void	initGL(void);
 	void	setBuffers(const ObjParser &parser);
@@ -83,6 +85,7 @@ private:
 	static void	framebufferSizeCallback(GLFWwindow * window, int w, int h);
 	static void	mousePositionCallback(GLFWwindow * window, double xpos, double ypos);
 	static void	mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
+	static void	scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 };
 
 #endif

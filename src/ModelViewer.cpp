@@ -31,6 +31,8 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	mouseLastY = 0.0f;
 	mouseDragging = false;
 
+	zoom = 5.0f;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -83,6 +85,7 @@ void	ModelViewer::initWindow(void)
 	glfwSetWindowUserPointer(window, this);
 	glfwSetCursorPosCallback(window, mousePositionCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	glfwSetScrollCallback(window, scrollCallback);
 
 	return ;
 }
@@ -209,7 +212,7 @@ void	ModelViewer::render(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Mat4	view = Mat4::identity();
-	view = Mat4::translate(view, Vec3(0.0f, 0.0f, CAMERA_DIST));
+	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
 	Mat4	projection = Mat4::perspective(FOV, WINDOW_WIDTH / WINDOW_HEIGHT, NEAR_PLANE, FAR_PLANE);
 
 	if (textureMode && mixValue < 1.0f)
@@ -284,6 +287,8 @@ void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double
 
 	viewer->mouseLastX = (float)xpos;
 	viewer->mouseLastY = (float)ypos;
+
+	return ;
 }
 
 void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
@@ -304,4 +309,19 @@ void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int actio
 		else if (action == GLFW_RELEASE)
 			viewer->mouseDragging = false;
 	}
+
+	return ;
+}
+
+void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    (void)xoffset;
+    ModelViewer *viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
+
+    viewer->zoom -= (float)yoffset * 0.5f;
+
+    if (viewer->zoom < 1.0f) viewer->zoom = 1.0f;
+    if (viewer->zoom > 50.0f) viewer->zoom = 50.0f;
+
+	return ;
 }
