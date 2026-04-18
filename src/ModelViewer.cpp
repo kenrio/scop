@@ -22,6 +22,9 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	uvMode = false;
 	uKeyPressed = false;
 
+	rotationAngle = 0.0f;
+	rotating = true;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -176,6 +179,17 @@ void	ModelViewer::processInput(void)
 	else
 		uKeyPressed = false;
 
+	if (keyInput->isPressed(GLFW_KEY_SPACE))
+	{
+		if (!spaceKeyPressed)
+		{
+			rotating = !rotating;
+			spaceKeyPressed = true;
+		}
+	}
+	else
+		spaceKeyPressed = false;
+
 	return ;
 }
 
@@ -206,6 +220,9 @@ void	ModelViewer::render(void)
 	if (uvModeValue > 1.0f) uvModeValue = 1.0f;
 	if (uvModeValue < 0.0f) uvModeValue = 0.0f;
 
+	if (rotating)
+		rotationAngle += 0.01f;
+
 	shader->use();
 
 	shader->setFloat("mixValue", mixValue);
@@ -221,7 +238,7 @@ void	ModelViewer::render(void)
 	Mat4	model = Mat4::identity();
 
 	model = Mat4::translate(model, objPos);
-	model = Mat4::rotate(model, (float)glfwGetTime() * -1.0f, Vec3(0.0f, 1.0f, 0.0f));
+	model = Mat4::rotate(model, rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
 	
 	shader->setMat4("model", model);
 

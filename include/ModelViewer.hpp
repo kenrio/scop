@@ -61,6 +61,10 @@ private:
 	bool	uvMode;
 	bool	uKeyPressed;
 
+	float	rotationAngle;
+	bool	rotating;
+	bool	spaceKeyPressed;
+
 	int		vertexCount;
 
 	void	initWindow(void);
