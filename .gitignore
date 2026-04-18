@@ -1,0 +1,8 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# user
+bin/
+scop
