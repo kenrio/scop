@@ -21,27 +21,40 @@ INC_DIR		:= include
 # SOURCES 
 
 
-SRC		:= \
-		main.cpp \
-		Vec3.cpp \
-		Vec4.cpp \
-		Mat4.cpp \
-		ObjParser.cpp \
-		KeyInputHandler.cpp \
-		Shader.cpp \
-		Texture.cpp \
-		ModelViewer.cpp \
+SRC			:= \
+			main.cpp \
+			Vec3.cpp \
+			Vec4.cpp \
+			Mat4.cpp \
+			ObjParser.cpp \
+			KeyInputHandler.cpp \
+			Shader.cpp \
+			Texture.cpp \
+			ModelViewer.cpp \
 
-C_SRC	:= \
-		glad.c \
+IMGUI_SRC	:= \
+			imgui/imgui.cpp \
+			imgui/imgui_draw.cpp \
+			imgui/imgui_tables.cpp \
+			imgui/imgui_widgets.cpp \
+			imgui/imgui_demo.cpp \
+			imgui/imgui_impl_glfw.cpp \
+			imgui/imgui_impl_opengl3.cpp \
 
-BIN		:= \
-		$(addprefix $(BIN_DIR)/, \
-		$(SRC:.cpp=.o))
+C_SRC		:= \
+			glad.c \
 
-C_BIN	:= \
-		$(addprefix $(BIN_DIR)/, \
-		$(C_SRC:.c=.o))
+BIN			:= \
+			$(addprefix $(BIN_DIR)/, \
+			$(SRC:.cpp=.o))
+
+IMGUI_BIN	:= \
+			$(addprefix $(BIN_DIR)/, \
+			$(IMGUI_SRC:.cpp=.o))
+
+C_BIN		:= \
+			$(addprefix $(BIN_DIR)/, \
+			$(C_SRC:.c=.o))
 
 
 # **************************************************************************** #
@@ -58,7 +71,7 @@ LDFLAGS		:= -L/opt/homebrew/lib $(GL_FLAGS) $(GLFW_FLAGS)
 # INCLUDE
 
 
-INCLUDE		:= -I$(INC_DIR) -I/opt/homebrew/include
+INCLUDE		:= -I$(INC_DIR) -I$(INC_DIR)/imgui -I/opt/homebrew/include
 
 
 # **************************************************************************** #
@@ -70,8 +83,8 @@ all: $(NAME)
 run: all
 	./$(NAME)
 
-$(NAME): $(BIN) $(C_BIN)
-	$(CXX_C) $(CXX_FLAGS) $(BIN) $(C_BIN)  $(LDFLAGS) -o $@
+$(NAME): $(BIN) $(IMGUI_BIN) $(C_BIN)
+	$(CXX_C) $(CXX_FLAGS) $(BIN) $(IMGUI_BIN) $(C_BIN) $(LDFLAGS) -o $@
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
