@@ -31,6 +31,8 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	mouseLastY = 0.0f;
 	mouseDragging = false;
 
+	mousePanning = false;
+
 	zoom = 5.0f;
 
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
@@ -274,16 +276,21 @@ void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double
 {
 	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
-	if (!viewer->mouseDragging)
-		return ;
-
 	float	dx = (float)xpos - viewer->mouseLastX;
 	float	dy = (float)ypos - viewer->mouseLastY;
 
-	Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * 0.01f, Vec3(1.0f, 0.0f, 0.0f));
-	Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * 0.01f, Vec3(0.0f, 1.0f, 0.0f));
+	if (viewer->mouseDragging)
+	{
+		Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * 0.01f, Vec3(1.0f, 0.0f, 0.0f));
+		Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * 0.01f, Vec3(0.0f, 1.0f, 0.0f));
 
-	viewer->rotationMatrix = rotX * rotY * viewer->rotationMatrix;
+		viewer->rotationMatrix = rotX * rotY * viewer->rotationMatrix;
+	}
+	else if (viewer->mousePanning)
+	{
+		viewer->objPos.x += dx * 0.01f;
+		viewer->objPos.y -= dy * 0.01;
+	}
 
 	viewer->mouseLastX = (float)xpos;
 	viewer->mouseLastY = (float)ypos;
@@ -296,18 +303,30 @@ void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int actio
 	(void)mods;
 	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
+	double	x, y;
+	glfwGetCursorPos(window, &x, &y);
+
 	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
 		if (action == GLFW_PRESS)
 		{
 			viewer->mouseDragging = true;
-			double	x, y;
-			glfwGetCursorPos(window, &x, &y);
 			viewer->mouseLastX = (float)x;
 			viewer->mouseLastY = (float)y;
 		}
 		else if (action == GLFW_RELEASE)
 			viewer->mouseDragging = false;
+	}
+	else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			viewer->mousePanning = true;
+			viewer->mouseLastX = (float)x;
+			viewer->mouseLastY = (float)y;
+		}
+		else if (action == GLFW_RELEASE)
+			viewer->mousePanning = false;
 	}
 
 	return ;
@@ -321,7 +340,7 @@ void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoff
     viewer->zoom -= (float)yoffset * 0.5f;
 
     if (viewer->zoom < 1.0f) viewer->zoom = 1.0f;
-    if (viewer->zoom > 50.0f) viewer->zoom = 50.0f;
+    if (viewer->zoom > 2000.0f) viewer->zoom = 2000.0f;
 
 	return ;
 }

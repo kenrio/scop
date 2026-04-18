@@ -14,7 +14,7 @@ const std::string	WINDOW_TITLE = "scop";
 
 const float		FOV = 0.785f;
 const float		NEAR_PLANE = 0.1f;
-const float		FAR_PLANE = 1000.0f;
+const float		FAR_PLANE = 3000.0f;
 const float		CAMERA_DIST = -5.0f;
 
 const float		MOVE_SPEED = 0.02f;
@@ -72,6 +72,8 @@ private:
 	float	mouseLastX;
 	float	mouseLastY;
 	bool	mouseDragging;
+
+	bool	mousePanning;
 
 	float	zoom;
 
