@@ -12,6 +12,7 @@ class Texture
 {
 
 public:
+
 	unsigned int	ID;
 	std::string		type;
 	std::string		path;
@@ -21,8 +22,10 @@ public:
 
 	void	bind(unsigned int unit = 0) const;
 	void	unbind(void) const;	
+	void	reload(const std::string &newPath, bool generateMipmap);
 
 private:
+
 	void			load(const std::string &path, bool generateMipmap);
 	unsigned char *	loadBMP(const std::string &path, int &width, int &height, int &channels);
 

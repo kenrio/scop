@@ -141,3 +141,11 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 
 	return (data);
 }
+
+void	Texture::reload(const std::string &newPath, bool generateMipmap)
+{
+	glDeleteTextures(1, &ID);
+	load(newPath, generateMipmap);
+
+	return ;
+}

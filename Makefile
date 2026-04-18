@@ -7,7 +7,7 @@ NAME		:= scop
 UNAME		:= $(shell uname -s)
 
 CXX_C		:= c++
-CXX_FLAGS	:= -Wall -Wextra -Werror
+CXX_FLAGS	:= -Wall -Wextra -Werror -std=c++17 -pedantic
 
 CC			:= gcc
 C_FLAGS		:= -Wall -Wextra -Werror

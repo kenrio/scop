@@ -35,6 +35,11 @@ ModelViewer::ModelViewer(const std::string &objPath)
 
 	zoom = 5.0f;
 
+	objFiles = findFiles("resources", ".obj");
+	bmpFiles = findFiles("resources", ".bmp");
+	currentObjIndex = 0;
+	currentBmpIndex = 0;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -51,6 +56,11 @@ ModelViewer::~ModelViewer()
 	delete keyInput;
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glfwTerminate();
 }
 
@@ -88,6 +98,11 @@ void	ModelViewer::initWindow(void)
 	glfwSetCursorPosCallback(window, mousePositionCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetScrollCallback(window, scrollCallback);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	return ;
 }
@@ -213,6 +228,43 @@ void	ModelViewer::render(void)
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("SCOP");
+	if (ImGui::BeginCombo("Model", objFiles[currentObjIndex].c_str()))
+	{
+		for (int i = 0; i < (int)objFiles.size(); ++i)
+		{
+			bool	selected = (i == currentObjIndex);
+			if (ImGui::Selectable(objFiles[i].c_str(), selected))
+			{
+				currentObjIndex = i;
+				loadModel(objFiles[i]);
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	if (ImGui::BeginCombo("Texture", bmpFiles[currentBmpIndex].c_str()))
+	{
+		for (int i = 0; i < (int)bmpFiles.size(); ++i)
+		{
+			bool	selected = (i == currentBmpIndex);
+			if (ImGui::Selectable(bmpFiles[i].c_str(), selected))
+			{
+				currentBmpIndex = i;
+				texture->reload("resources/" + bmpFiles[i], true);
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::End();
+
+	ImGui::Render();
+
 	Mat4	view = Mat4::identity();
 	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
 	Mat4	projection = Mat4::perspective(FOV, WINDOW_WIDTH / WINDOW_HEIGHT, NEAR_PLANE, FAR_PLANE);
@@ -259,6 +311,8 @@ void	ModelViewer::render(void)
 	shader->setMat4("model", model);
 
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	glfwSwapBuffers(window);
 
 	return ;
@@ -274,6 +328,9 @@ void	ModelViewer::framebufferSizeCallback(GLFWwindow * window, int width, int he
 
 void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double ypos)
 {
+	if (ImGui::GetIO().WantCaptureMouse)
+		return ;
+
 	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
 	float	dx = (float)xpos - viewer->mouseLastX;
@@ -300,6 +357,9 @@ void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double
 
 void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 {
+	if (ImGui::GetIO().WantCaptureMouse)
+		return ;
+
 	(void)mods;
 	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
@@ -334,6 +394,9 @@ void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int actio
 
 void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+	if (ImGui::GetIO().WantCaptureMouse)
+		return ;
+
     (void)xoffset;
     ModelViewer *viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
@@ -342,5 +405,37 @@ void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoff
     if (viewer->zoom < 1.0f) viewer->zoom = 1.0f;
     if (viewer->zoom > 2000.0f) viewer->zoom = 2000.0f;
 
+	return ;
+}
+
+std::vector<std::string>	ModelViewer::findFiles(const std::string &directory, const std::string &extension)
+{
+	std::vector<std::string>	files;
+
+	for (const auto &entry : std::filesystem::directory_iterator(directory))
+	{
+		if (entry.path().extension() == extension)
+			files.push_back(entry.path().filename().string());
+	}
+
+	std::sort(files.begin(), files.end());
+
+	return (files);
+}
+
+void	ModelViewer::loadModel(const std::string &filename)
+{
+	std::string	path = "resources/" + filename;
+
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+
+	ObjParser	parser(path);
+	setBuffers(parser);
+
+	rotationMatrix = Mat4::identity();
+	rotationAngle = 0.0f;
+	objPos = Vec3(0.0f, 0.0f, 0.0f);
+	
 	return ;
 }

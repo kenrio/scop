@@ -2,6 +2,11 @@
 # define MODELVIEWER_HPP
 
 #include <string>
+#include <filesystem>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include "ObjParser.hpp"
 #include "Texture.hpp"
@@ -77,6 +82,11 @@ private:
 
 	float	zoom;
 
+	std::vector<std::string>	objFiles;
+	std::vector<std::string>	bmpFiles;
+	int							currentObjIndex;
+	int							currentBmpIndex;
+
 	void	initWindow(void);
 	void	initGL(void);
 	void	setBuffers(const ObjParser &parser);
@@ -88,6 +98,9 @@ private:
 	static void	mousePositionCallback(GLFWwindow * window, double xpos, double ypos);
 	static void	mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	static void	scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+
+	std::vector<std::string>	findFiles(const std::string &dir, const std::string &ext);
+	void						loadModel(const std::string &filename);
 };
 
 #endif
