@@ -67,6 +67,12 @@ private:
 
 	int		vertexCount;
 
+	Mat4	rotationMatrix;
+
+	float	mouseLastX;
+	float	mouseLastY;
+	bool	mouseDragging;
+
 	void	initWindow(void);
 	void	initGL(void);
 	void	setBuffers(const ObjParser &parser);
@@ -75,7 +81,8 @@ private:
 	void	render(void);
 
 	static void	framebufferSizeCallback(GLFWwindow * window, int w, int h);
-
+	static void	mousePositionCallback(GLFWwindow * window, double xpos, double ypos);
+	static void	mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 };
 
 #endif

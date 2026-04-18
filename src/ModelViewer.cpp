@@ -25,6 +25,12 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	rotationAngle = 0.0f;
 	rotating = true;
 
+	rotationMatrix = Mat4::identity();
+
+	mouseLastX = 0.0f;
+	mouseLastY = 0.0f;
+	mouseDragging = false;
+
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
 	shader->use();
 
@@ -73,6 +79,10 @@ void	ModelViewer::initWindow(void)
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
+	glfwSetWindowUserPointer(window, this);
+	glfwSetCursorPosCallback(window, mousePositionCallback);
+	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 	return ;
 }
@@ -237,8 +247,9 @@ void	ModelViewer::render(void)
 	glBindVertexArray(VAO);
 	Mat4	model = Mat4::identity();
 
+	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
 	model = Mat4::translate(model, objPos);
-	model = Mat4::rotate(model, rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
+	model = model * rotationMatrix * autoRot;
 	
 	shader->setMat4("model", model);
 
@@ -254,4 +265,43 @@ void	ModelViewer::framebufferSizeCallback(GLFWwindow * window, int width, int he
 	glViewport(0, 0, width, height);
 
 	return ;
+}
+
+void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double ypos)
+{
+	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
+
+	if (!viewer->mouseDragging)
+		return ;
+
+	float	dx = (float)xpos - viewer->mouseLastX;
+	float	dy = (float)ypos - viewer->mouseLastY;
+
+	Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * 0.01f, Vec3(1.0f, 0.0f, 0.0f));
+	Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * 0.01f, Vec3(0.0f, 1.0f, 0.0f));
+
+	viewer->rotationMatrix = rotX * rotY * viewer->rotationMatrix;
+
+	viewer->mouseLastX = (float)xpos;
+	viewer->mouseLastY = (float)ypos;
+}
+
+void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+{
+	(void)mods;
+	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			viewer->mouseDragging = true;
+			double	x, y;
+			glfwGetCursorPos(window, &x, &y);
+			viewer->mouseLastX = (float)x;
+			viewer->mouseLastY = (float)y;
+		}
+		else if (action == GLFW_RELEASE)
+			viewer->mouseDragging = false;
+	}
 }
