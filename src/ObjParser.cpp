@@ -81,6 +81,17 @@ void	ObjParser::parse(std::string const &filepath)
 	for (size_t i = 0; i < positions.size(); ++i)
 		positions[i] = positions[i] - center;
 
+	float	minZ = positions[0].z, maxZ = positions[0].z;
+	float	minY = positions[0].y, maxY = positions[0].y;
+
+	for (size_t i = 1; i < positions.size(); ++i)
+	{
+		if (positions[i].z < minZ) minZ = positions[i].z;
+		if (positions[i].z > maxZ) maxZ = positions[i].z;
+		if (positions[i].y < minY) minY = positions[i].y;
+		if (positions[i].y > maxY) maxY = positions[i].y;
+	}
+
 	for (size_t i = 0; i < faces.size(); i += 3)
 	{
 		float	gray = static_cast<float>(i / 3) / (faces.size() / 3);
@@ -119,8 +130,8 @@ void	ObjParser::parse(std::string const &filepath)
 			vertices.push_back(gray);
 			vertices.push_back(gray);
 
-			vertices.push_back(pos.z);
-			vertices.push_back(pos.y);
+			vertices.push_back((pos.z - minZ) / (maxZ - minZ));
+			vertices.push_back((pos.y - minY) / (maxY - minY));
 
 			vertices.push_back(uv.x);
 			vertices.push_back(uv.y);

@@ -203,6 +203,9 @@ void	ModelViewer::render(void)
 	else if (!uvMode && uvModeValue > 0.0f)
 		uvModeValue -= MIX_SPEED;
 
+	if (uvModeValue > 1.0f) uvModeValue = 1.0f;
+	if (uvModeValue < 0.0f) uvModeValue = 0.0f;
+
 	shader->use();
 
 	shader->setFloat("mixValue", mixValue);
