@@ -3,6 +3,7 @@
 
 ModelViewer::ModelViewer(const std::string &objPath)
 :
+VAO(0), VBO(0), texture(nullptr), shader(nullptr), keyInput(nullptr),
 mixValue(0.0f), textureMode(false), tKeyPressed(false),
 lightingValue(0.0f), lightingMode(false), lKeyPressed(false),
 uvModeValue(0.0f), uvMode(false), uKeyPressed(false),
@@ -16,6 +17,14 @@ zoom(DEFAULT_ZOOM), currentObjIndex(0), currentBmpIndex(0)
 	initGL();
 	
 	ObjParser	objParser(objPath);
+	if (!objParser.isValid())
+	{
+		std::cerr << "Failed to load model: " << objPath << std::endl;
+		valid = false;
+		return ;
+	}
+	valid = true;
+
 	setBuffers(objParser);
 
 	texture = new Texture(TEXTURE_PATH);
@@ -35,8 +44,11 @@ ModelViewer::~ModelViewer()
 	delete shader;
 	delete texture;
 	delete keyInput;
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+
+	if (VAO)
+		glDeleteVertexArrays(1, &VAO);
+	if (VBO)
+		glDeleteBuffers(1, &VBO);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -47,6 +59,9 @@ ModelViewer::~ModelViewer()
 
 void	ModelViewer::run(void)
 {
+	if (!valid)
+		return ;
+
 	while (!keyInput->shouldClose())
 	{
 		processInput();
@@ -54,6 +69,11 @@ void	ModelViewer::run(void)
 	}
 
 	return ;
+}
+
+bool	ModelViewer::isValid(void) const
+{
+	return (valid);
 }
 
 void	ModelViewer::initWindow(void)

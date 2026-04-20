@@ -46,16 +46,19 @@ public:
 	~ModelViewer();
 
 	void	run(void);
+	bool	isValid(void) const;
 
 private:
+
+	bool			valid;
 
 	GLFWwindow *	window;
 
 	unsigned int	VAO;
 	unsigned int	VBO;
 
-	Shader *			shader;
 	Texture *			texture;
+	Shader *			shader;
 	KeyInputHandler *	keyInput;
 
 	Vec3	objPos;

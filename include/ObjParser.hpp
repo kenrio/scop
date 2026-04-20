@@ -27,6 +27,8 @@ public:
 	std::vector<unsigned int> const	&getIndices(void) const;
 	Vec3							getCenter(void) const;
 
+	bool	isValid(void) const;
+
 private:
 
 	std::vector<Vec3>			positions;
@@ -43,6 +45,7 @@ private:
 
 	void	parseFace(std::string const &line);
 	void	parseVertexToken(std::string const &token, int &vIdx, int &vtIdx, int &vnIdx);
+
 
 };
 

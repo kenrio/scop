@@ -32,6 +32,11 @@ Vec3	ObjParser::getCenter(void) const
 	return (Vec3(center.x / n, center.y / n, center.z / n));
 }
 
+bool	ObjParser::isValid(void) const
+{
+	return (!positions.empty() && !faces.empty());
+}
+
 void	ObjParser::parse(std::string const &filePath)
 {
 	parseFile(filePath);

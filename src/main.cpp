@@ -12,6 +12,10 @@ int	main(int argc, char *argv[])
 		objPath = DEFAULT_OBJ_PATH;
 	
 	ModelViewer	modelViewer(objPath);
+
+	if (!modelViewer.isValid())
+		return (1);
+
 	modelViewer.run();
 
 	return (0);
