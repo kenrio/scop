@@ -2,48 +2,29 @@
 
 
 ModelViewer::ModelViewer(const std::string &objPath)
+:
+mixValue(0.0f), textureMode(false), tKeyPressed(false),
+lightingValue(0.0f), lightingMode(false), lKeyPressed(false),
+uvModeValue(0.0f), uvMode(false), uKeyPressed(false),
+rotationAngle(0.0f), rotating(true), spaceKeyPressed(false),
+rotationMatrix(Mat4::identity()),
+mouseLastX(0.0f), mouseLastY(0.0f),
+mouseDragging(false), mousePanning(false),
+zoom(5.0f), currentObjIndex(0), currentBmpIndex(0)
 {
 	initWindow();
 	initGL();
-
+	
 	ObjParser	objParser(objPath);
 	setBuffers(objParser);
 
 	texture = new Texture(TEXTURE_PATH);
-	mixValue = 0.0f;
-	textureMode = false;
-	tKeyPressed = false;
-
-	lightingValue = 0.0f;
-	lightingMode = false;
-	lKeyPressed = false;
-
-	uvModeValue = 0.0f;
-	uvMode = false;
-	uKeyPressed = false;
-
-	rotationAngle = 0.0f;
-	rotating = true;
-
-	rotationMatrix = Mat4::identity();
-
-	mouseLastX = 0.0f;
-	mouseLastY = 0.0f;
-	mouseDragging = false;
-
-	mousePanning = false;
-
-	zoom = 5.0f;
+	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
+	shader->use();
+	keyInput = new KeyInputHandler(window);
 
 	objFiles = findFiles("resources", ".obj");
 	bmpFiles = findFiles("resources", ".bmp");
-	currentObjIndex = 0;
-	currentBmpIndex = 0;
-
-	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
-	shader->use();
-
-	keyInput = new KeyInputHandler(window);
 
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -176,49 +157,26 @@ void	ModelViewer::processInput(void)
 	if (keyInput->isPressed(GLFW_KEY_Q)) objPos.y -= MOVE_SPEED;
 	if (keyInput->isPressed(GLFW_KEY_E)) objPos.y += MOVE_SPEED;
 
-	if (keyInput->isPressed(GLFW_KEY_T))
-	{
-		if (!tKeyPressed)
-		{
-			textureMode = !textureMode;
-			tKeyPressed = true;
-		}
-	}
-	else
-		tKeyPressed = false;
+	handleToggle(GLFW_KEY_T, tKeyPressed, textureMode);
+	handleToggle(GLFW_KEY_L, lKeyPressed, lightingMode);
+	handleToggle(GLFW_KEY_U, uKeyPressed, uvMode);
+	handleToggle(GLFW_KEY_SPACE, spaceKeyPressed, rotating);
 
-	if (keyInput->isPressed(GLFW_KEY_L))
-	{
-		if (!lKeyPressed)
-		{
-			lightingMode = !lightingMode;
-			lKeyPressed = true;
-		}
-	}
-	else
-		lKeyPressed = false;
+	return ;
+}
 
-	if (keyInput->isPressed(GLFW_KEY_U))
+void	ModelViewer::handleToggle(int key, bool &keyPressed, bool &mode)
+{
+	if (keyInput->isPressed(key))
 	{
-		if (!uKeyPressed)
+		if (!keyPressed)
 		{
-			uvMode = !uvMode;
-			uKeyPressed = true;
+			mode = !mode;
+			keyPressed = true;
 		}
 	}
 	else
-		uKeyPressed = false;
-
-	if (keyInput->isPressed(GLFW_KEY_SPACE))
-	{
-		if (!spaceKeyPressed)
-		{
-			rotating = !rotating;
-			spaceKeyPressed = true;
-		}
-	}
-	else
-		spaceKeyPressed = false;
+		keyPressed = false;
 
 	return ;
 }
@@ -228,11 +186,24 @@ void	ModelViewer::render(void)
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	renderGUI();
+	updateTransitions();
+	renderScene();
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	glfwSwapBuffers(window);
+
+	return ;
+}
+
+void	ModelViewer::renderGUI(void)
+{
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
 	ImGui::Begin("SCOP");
+
 	if (ImGui::BeginCombo("Model", objFiles[currentObjIndex].c_str()))
 	{
 		for (int i = 0; i < (int)objFiles.size(); ++i)
@@ -262,62 +233,60 @@ void	ModelViewer::render(void)
 	}
 
 	ImGui::End();
-
 	ImGui::Render();
 
-	Mat4	view = Mat4::identity();
-	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
+	return ;
+}
 
-	int		width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	float	aspect = (float)width / (float)height;
-	Mat4	projection = Mat4::perspective(FOV, aspect, NEAR_PLANE, FAR_PLANE);
-
-	if (textureMode && mixValue < 1.0f)
-		mixValue += MIX_SPEED;
-	else if (!textureMode && mixValue > 0.0f)
-		mixValue -= MIX_SPEED;
-
-	if (lightingMode && lightingValue < 1.0f)
-		lightingValue += MIX_SPEED;
-	else if (!lightingMode && lightingValue > 0.0f)
-		lightingValue -= MIX_SPEED;
-
-	if (uvMode && uvModeValue < 1.0f)
-		uvModeValue += MIX_SPEED;
-	else if (!uvMode && uvModeValue > 0.0f)
-		uvModeValue -= MIX_SPEED;
-
-	if (uvModeValue > 1.0f) uvModeValue = 1.0f;
-	if (uvModeValue < 0.0f) uvModeValue = 0.0f;
+void	ModelViewer::updateTransitions(void)
+{
+	smoothTransition(textureMode, mixValue, MIX_SPEED);
+	smoothTransition(lightingMode, lightingValue, MIX_SPEED);
+	smoothTransition(uvMode, uvModeValue, MIX_SPEED);
 
 	if (rotating)
 		rotationAngle += 0.01f;
+}
 
-	shader->use();
+void	ModelViewer::smoothTransition(bool mode, float &value, float speed)
+{
+	if (mode && value < 1.0f)
+		value += speed;
+	else if (!mode && value >= 0.0f)
+		value -= speed;
+	value = std::max(0.0f, std::min(1.0f, value));
 
-	shader->setFloat("mixValue", mixValue);
-	shader->setMat4("view", view);
-	shader->setMat4("projection", projection);
+	return ;
+}
 
-	texture->bind(0);
-	shader->setInt("ourTexture", 0);
-	shader->setFloat("lightingValue", lightingValue);
-	shader->setFloat("uvMode", uvModeValue);
+void	ModelViewer::renderScene(void)
+{
+	int		width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	float	aspect = (float)width / (float)height;
 
-	glBindVertexArray(VAO);
+	Mat4	view = Mat4::identity();
+	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
+	Mat4	projection = Mat4::perspective(FOV, aspect, NEAR_PLANE, FAR_PLANE);
+
 	Mat4	model = Mat4::identity();
-
 	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
 	model = Mat4::translate(model, objPos);
 	model = model * rotationMatrix * autoRot;
-	
+
+	shader->use();
 	shader->setMat4("model", model);
+	shader->setMat4("view", view);
+	shader->setMat4("projection", projection);
+	shader->setFloat("mixValue", mixValue);
+	shader->setFloat("lightingValue", lightingValue);
+	shader->setFloat("uvMode", uvModeValue);
 
+	texture->bind(0);
+	shader->setInt("ourTexture", 0);
+
+	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	glfwSwapBuffers(window);
 
 	return ;
 }

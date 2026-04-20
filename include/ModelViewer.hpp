@@ -92,7 +92,13 @@ private:
 	void	setBuffers(const ObjParser &parser);
 
 	void	processInput(void);
+	void	handleToggle(int key, bool &keyPressed, bool &mode);
+
 	void	render(void);
+	void	renderGUI(void);
+	void	updateTransitions(void);
+	void	smoothTransition(bool mode, float &value, float speed);
+	void	renderScene(void);
 
 	static void	framebufferSizeCallback(GLFWwindow * window, int w, int h);
 	static void	mousePositionCallback(GLFWwindow * window, double xpos, double ypos);
