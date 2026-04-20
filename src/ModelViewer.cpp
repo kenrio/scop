@@ -10,7 +10,7 @@ rotationAngle(0.0f), rotating(true), spaceKeyPressed(false),
 rotationMatrix(Mat4::identity()),
 mouseLastX(0.0f), mouseLastY(0.0f),
 mouseDragging(false), mousePanning(false),
-zoom(5.0f), currentObjIndex(0), currentBmpIndex(0)
+zoom(DEFAULT_ZOOM), currentObjIndex(0), currentBmpIndex(0)
 {
 	initWindow();
 	initGL();
@@ -240,12 +240,12 @@ void	ModelViewer::renderGUI(void)
 
 void	ModelViewer::updateTransitions(void)
 {
-	smoothTransition(textureMode, mixValue, MIX_SPEED);
-	smoothTransition(lightingMode, lightingValue, MIX_SPEED);
-	smoothTransition(uvMode, uvModeValue, MIX_SPEED);
+	smoothTransition(textureMode, mixValue, TRANSITION_SPEED);
+	smoothTransition(lightingMode, lightingValue, TRANSITION_SPEED);
+	smoothTransition(uvMode, uvModeValue, TRANSITION_SPEED);
 
 	if (rotating)
-		rotationAngle += 0.01f;
+		rotationAngle += ROTATION_SPEED;
 }
 
 void	ModelViewer::smoothTransition(bool mode, float &value, float speed)
@@ -311,15 +311,15 @@ void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double
 
 	if (viewer->mouseDragging)
 	{
-		Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * 0.01f, Vec3(1.0f, 0.0f, 0.0f));
-		Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * 0.01f, Vec3(0.0f, 1.0f, 0.0f));
+		Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * MOUSE_SENSITIVITY, Vec3(1.0f, 0.0f, 0.0f));
+		Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * MOUSE_SENSITIVITY, Vec3(0.0f, 1.0f, 0.0f));
 
 		viewer->rotationMatrix = rotX * rotY * viewer->rotationMatrix;
 	}
 	else if (viewer->mousePanning)
 	{
-		viewer->objPos.x += dx * 0.01f;
-		viewer->objPos.y -= dy * 0.01;
+		viewer->objPos.x += dx * MOUSE_SENSITIVITY;
+		viewer->objPos.y -= dy * MOUSE_SENSITIVITY;
 	}
 
 	viewer->mouseLastX = (float)xpos;
@@ -375,8 +375,8 @@ void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoff
 
     viewer->zoom -= (float)yoffset * 0.5f;
 
-    if (viewer->zoom < 1.0f) viewer->zoom = 1.0f;
-    if (viewer->zoom > 2000.0f) viewer->zoom = 2000.0f;
+    if (viewer->zoom < ZOOM_MIN) viewer->zoom = ZOOM_MIN;
+    if (viewer->zoom > ZOOM_MAX) viewer->zoom = ZOOM_MAX;
 
 	return ;
 }
