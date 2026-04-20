@@ -36,11 +36,18 @@ void	ObjParser::parse(std::string const &filePath)
 {
 	parseFile(filePath);
 
+	if (positions.empty())
+	{
+		std::cerr << "No vertices found in: " << filePath << std::endl;
+		return ;
+	}
+
 	center = getCenter();
 	for (size_t i = 0; i < positions.size(); ++i)
 		positions[i] = positions[i] - center;
 
-	buildVertices();
+	if (!faces.empty())
+		buildVertices();
 
 	return ;
 }

@@ -32,6 +32,7 @@ const float		TRANSITION_SPEED = 0.01f;
 
 const int		VERTEX_STRIDE = 13;
 
+const std::string	DEFAULT_OBJ_PATH = "resources/42.obj";
 const std::string	TEXTURE_PATH = "resources/snoutBeetle.bmp";
 const std::string	VERTEX_SHADER = "shaders/vertex.glsl";
 const std::string	FRAGMENT_SHADER = "shaders/fragment.glsl";
