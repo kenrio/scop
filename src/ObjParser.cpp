@@ -1,8 +1,9 @@
 #include "ObjParser.hpp"
 
-ObjParser::ObjParser(std::string const &filepath)
+ObjParser::ObjParser(std::string const &filePath)
 {
-	parse(filepath);
+	parse(filePath);
+
 	// std::cout << "Positions: " << positions.size() << std::endl;
     // std::cout << "Faces: " << faces.size() << std::endl;
     // std::cout << "Vertices: " << vertices.size() << std::endl;
@@ -31,13 +32,26 @@ Vec3	ObjParser::getCenter(void) const
 	return (Vec3(center.x / n, center.y / n, center.z / n));
 }
 
-void	ObjParser::parse(std::string const &filepath)
+void	ObjParser::parse(std::string const &filePath)
 {
-	std::ifstream	file(filepath);
+	parseFile(filePath);
+
+	center = getCenter();
+	for (size_t i = 0; i < positions.size(); ++i)
+		positions[i] = positions[i] - center;
+
+	buildVertices();
+
+	return ;
+}
+
+void	ObjParser::parseFile(const std::string &filePath)
+{
+	std::ifstream	file(filePath);
 
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open: " << filepath << std::endl;
+		std::cerr << "Failed to open: " << filePath << std::endl;
 		return ;
 	}
 
@@ -76,11 +90,11 @@ void	ObjParser::parse(std::string const &filepath)
 	}
 	file.close();
 
-	center = getCenter();
+	return ;
+}
 
-	for (size_t i = 0; i < positions.size(); ++i)
-		positions[i] = positions[i] - center;
-
+void	ObjParser::buildVertices(void)
+{
 	float	minZ = positions[0].z, maxZ = positions[0].z;
 	float	minY = positions[0].y, maxY = positions[0].y;
 

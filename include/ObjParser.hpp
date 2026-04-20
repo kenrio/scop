@@ -21,7 +21,7 @@ class	ObjParser
 
 public:
 
-	ObjParser(std::string const &filepath);
+	ObjParser(std::string const &filePath);
 
 	std::vector<float> const		&getVertices(void) const;
 	std::vector<unsigned int> const	&getIndices(void) const;
@@ -37,7 +37,10 @@ private:
 	std::vector<unsigned int>	indices;
 	Vec3						center;
 
-	void	parse(std::string const &filepath);
+	void	parse(std::string const &filePath);
+	void	parseFile(const std::string &filePath);
+	void	buildVertices(void);
+
 	void	parseFace(std::string const &line);
 	void	parseVertexToken(std::string const &token, int &vIdx, int &vtIdx, int &vnIdx);
 
