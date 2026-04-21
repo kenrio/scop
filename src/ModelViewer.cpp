@@ -65,21 +65,25 @@ ModelViewer::~ModelViewer()
 	delete	normalShader;
 	delete	axisShader;
 
-	if (VAO)
-		glDeleteVertexArrays(1, &VAO);
-	if (VBO)
-		glDeleteBuffers(1, &VBO);
-
-	if (axisVAO)	
-		glDeleteVertexArrays(1, &axisVAO);
-	if (axisVBO)
-		glDeleteBuffers(1, &axisVBO);
+	deleteBuffers(modelBuf);
+	deleteBuffers(normalBuf);
+	deleteBuffers(axisBuf);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
 	glfwTerminate();
+}
+
+void	ModelViewer::deleteBuffers(GLBuffers &buf)
+{
+	if (buf.VAO)
+		glDeleteVertexArrays(1, &buf.VAO);
+	if (buf.VBO)
+		glDeleteBuffers(1, &buf.VBO);
+
+	return ;
 }
 
 void	ModelViewer::run(void)
@@ -159,20 +163,20 @@ void	ModelViewer::initGL(void)
 void	ModelViewer::setBuffers(const ObjParser &parser)
 {
 	std::vector<float> const &	vertices = parser.getVertices();
-	vertexCount = vertices.size() / VERTEX_STRIDE;
+	modelBuf.vertexCount = vertices.size() / VERTEX_STRIDE;
 
-	if (vertexCount == 0)
+	if (modelBuf.vertexCount == 0)
 	{
 		std::cerr << "No vertex data to display" << std::endl;
 		return ;
 	}
 
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &modelBuf.VBO);
+	glGenVertexArrays(1, &modelBuf.VAO);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(modelBuf.VAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, modelBuf.VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void *)0);
@@ -198,16 +202,16 @@ void	ModelViewer::setBuffers(const ObjParser &parser)
 void	ModelViewer::setNormalBuffers(const ObjParser &parser)
 {
 	std::vector<float> const &	lines = parser.getNormalLines();
-	normalVertexCount = lines.size() / 3;
+	normalBuf.vertexCount = lines.size() / 3;
 
-	if (normalVertexCount == 0)
+	if (normalBuf.vertexCount == 0)
 		return ;
 
-	glGenBuffers(1, &normalVBO);
-	glGenVertexArrays(1, &normalVAO);
+	glGenBuffers(1, &normalBuf.VBO);
+	glGenVertexArrays(1, &normalBuf.VAO);
 
-	glBindVertexArray(normalVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+	glBindVertexArray(normalBuf.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, normalBuf.VBO);
 	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(float), lines.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
@@ -233,11 +237,13 @@ void	ModelViewer::setAxisBuffers(void)
 		0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
     };
 
-	glGenVertexArrays(1, &axisVAO);
-	glGenBuffers(1, &axisVBO);
+	axisBuf.vertexCount = 6;
 
-	glBindVertexArray(axisVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glGenVertexArrays(1, &axisBuf.VAO);
+	glGenBuffers(1, &axisBuf.VBO);
+
+	glBindVertexArray(axisBuf.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, axisBuf.VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(axisData), axisData, GL_STATIC_DRAW);
 \
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
@@ -426,7 +432,7 @@ void	ModelViewer::renderAxis(void)
 	axisShader->setMat4("projection", projection);
 
 	glLineWidth(2.0f);
-	glBindVertexArray(axisVAO);
+	glBindVertexArray(axisBuf.VAO);
 	glDrawArrays(GL_LINES, 0, 6);
 
     // ビューポートを元に戻す
@@ -487,11 +493,11 @@ void	ModelViewer::renderScene(void)
 	texture->bind(0);
 	shader->setInt("ourTexture", 0);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(modelBuf.VAO);
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, modelBuf.vertexCount);
 
-	if (showNormals && normalVertexCount > 0)
+	if (showNormals && normalBuf.vertexCount > 0)
 	{
 		normalShader->use();
 		normalShader->setMat4("model", model);
@@ -499,8 +505,8 @@ void	ModelViewer::renderScene(void)
 		normalShader->setMat4("projection", projection);
 		normalShader->setVec3("lineColor", Vec3(0.0f, 1.0f, 1.0f));
 
-		glBindVertexArray(normalVAO);
-		glDrawArrays(GL_LINES, 0, normalVertexCount);
+		glBindVertexArray(normalBuf.VAO);
+		glDrawArrays(GL_LINES, 0, normalBuf.vertexCount);
 
 		shader->use();
 	}
@@ -619,8 +625,8 @@ void	ModelViewer::loadModel(const std::string &filename)
 
 	std::cout << "Loading model: " << filename << "..." << std::endl;
 
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &modelBuf.VBO);
+	glDeleteVertexArrays(1, &modelBuf.VAO);
 
 	ObjParser	parser(path);
 	setBuffers(parser);

@@ -40,6 +40,13 @@ std::string const	TEXTURE_PATH = "resources/snoutBeetle.bmp";
 std::string const	VERTEX_SHADER = "shaders/vertex.glsl";
 std::string const	FRAGMENT_SHADER = "shaders/fragment.glsl";
 
+struct	GLBuffers
+{
+	unsigned int	VAO = 0;
+	unsigned int	VBO = 0;
+	int				vertexCount = 0;
+};
+
 struct ToggleState
 {
 	bool	mode = false;
@@ -64,8 +71,9 @@ private:
 	bool			valid;
 	GLFWwindow *	window;
 
-	unsigned int	VAO = 0;
-	unsigned int	VBO = 0;
+	GLBuffers		modelBuf;
+	GLBuffers		normalBuf;
+	GLBuffers		axisBuf;
 
 	Texture *			texture = nullptr;
 	Shader *			shader = nullptr;
@@ -89,8 +97,6 @@ private:
 	bool	rotating = true;
 	bool	spaceKeyPressed = false;
 	
-	int		vertexCount;
-	
 	Mat4	rotationMatrix = Mat4::identity();
 	
 	float	mouseLastX = 0.0f;
@@ -99,14 +105,6 @@ private:
 	bool	mousePanning = false;
 	
 	float	zoom = DEFAULT_ZOOM;
-	
-	unsigned int	normalVAO = 0;
-	unsigned int	normalVBO = 0;
-
-	int				normalVertexCount = 0;
-	
-	unsigned int	axisVAO = 0;
-	unsigned int	axisVBO = 0;
 
 	std::vector<std::string>	objFiles;
 	std::vector<std::string>	bmpFiles;
@@ -118,6 +116,7 @@ private:
 	void	setBuffers(ObjParser const &parser);
 	void	setNormalBuffers(ObjParser const &parser);
 	void	setAxisBuffers(void);
+	void	deleteBuffers(GLBuffers &buf);
 
 	void	processInput(void);
 	void	handleToggle(int key, bool &keyPressed, bool &mode);
