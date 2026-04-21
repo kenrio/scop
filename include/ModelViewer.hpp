@@ -19,6 +19,7 @@ float const			WINDOW_HEIGHT = 1024.0f;
 std::string const	WINDOW_TITLE = "scop";
 
 Vec3 const		BACKGROUND_COLOR = {0.25f, 0.25f, 0.25f};
+Vec3 const		NORMAL_LINE_COLOR = {0.0f, 1.0f, 1.0f};
 
 float const		FOV = 0.785f;
 float const		NEAR_PLANE = 0.1f;
@@ -39,6 +40,10 @@ std::string const	DEFAULT_OBJ_PATH = "resources/42.obj";
 std::string const	TEXTURE_PATH = "resources/snoutBeetle.bmp";
 std::string const	VERTEX_SHADER = "shaders/vertex.glsl";
 std::string const	FRAGMENT_SHADER = "shaders/fragment.glsl";
+std::string const	NORMAL_VERTEX_SHADER = "shaders/normal_vertex.glsl";
+std::string const	NORMAL_FRAGMENT_SHADER = "shaders/normal_fragment.glsl";
+std::string const	AXIS_VERTEX_SHADER = "shaders/axis_vertex.glsl";
+std::string const	AXIS_FRAGMENT_SHADER = "shaders/axis_fragment.glsl";
 
 struct	GLBuffers
 {
@@ -142,6 +147,7 @@ private:
 	static void	scrollCallback(GLFWwindow * window, double xoffset, double yoffset);
 
 	std::vector<std::string>	findFiles(std::string const &dir, std::string const &ext);
+	int							findFileIndex(std::vector<std::string> const &files, std::string const &filename);
 	void						loadModel(std::string const &filename);
 };
 

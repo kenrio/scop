@@ -24,30 +24,14 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	shader->use();
 	keyInput = new KeyInputHandler(window);
 
-	normalShader = new Shader("shaders/normal_vertex.glsl", "shaders/normal_fragment.glsl");
-	axisShader = new Shader("shaders/axis_vertex.glsl", "shaders/axis_fragment.glsl");
+	normalShader = new Shader(NORMAL_VERTEX_SHADER, NORMAL_FRAGMENT_SHADER);
+	axisShader = new Shader(AXIS_VERTEX_SHADER, AXIS_FRAGMENT_SHADER);
 
 	objFiles = findFiles("resources", ".obj");
-	std::string	objFilename = std::filesystem::path(objPath).filename().string();
-	for (int i = 0; i < (int)objFiles.size(); ++i)
-	{
-		if (objFiles[i] == objFilename)
-		{
-			currentObjIndex = i;
-			break ;
-		}
-	}
-
+	currentObjIndex = findFileIndex(objFiles, std::filesystem::path(objPath).filename().string());
+	
 	bmpFiles = findFiles("resources", ".bmp");
-	std::string	texFilename = std::filesystem::path(TEXTURE_PATH).filename().string();
-	for (int i = 0; i < (int)bmpFiles.size(); ++i)
-	{
-		if (bmpFiles[i] == texFilename)
-		{
-			currentBmpIndex = i;
-			break ;
-		}
-	}
+	currentBmpIndex = findFileIndex(bmpFiles, std::filesystem::path(TEXTURE_PATH).filename().string());
 
 	modelPositionCount = objParser.getPositionCount();
 	modelFaceCount = objParser.getFaceCount();
@@ -485,9 +469,6 @@ void	ModelViewer::updateMatrices(void)
 
 void	ModelViewer::renderScene(void)
 {
-	int		width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-
 	shader->use();
 	shader->setMat4("model", currentModel);
 	shader->setMat4("view", currentView);
@@ -509,7 +490,7 @@ void	ModelViewer::renderScene(void)
 		normalShader->setMat4("model", currentModel);
 		normalShader->setMat4("view", currentView);
 		normalShader->setMat4("projection", currentProjection);
-		normalShader->setVec3("lineColor", Vec3(0.0f, 1.0f, 1.0f));
+		normalShader->setVec3("lineColor", NORMAL_LINE_COLOR);
 
 		glBindVertexArray(normalBuf.VAO);
 		glDrawArrays(GL_LINES, 0, normalBuf.vertexCount);
@@ -623,6 +604,17 @@ std::vector<std::string>	ModelViewer::findFiles(const std::string &directory, co
 	std::sort(files.begin(), files.end());
 
 	return (files);
+}
+
+int	ModelViewer::findFileIndex(std::vector<std::string> const &files, std::string const &filename)
+{
+	for (int i = 0; i < (int)files.size(); ++i)
+	{
+		if (files[i] == filename)
+			return (i);
+	}
+
+	return (0);
 }
 
 void	ModelViewer::loadModel(const std::string &filename)
