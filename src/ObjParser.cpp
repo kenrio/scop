@@ -120,7 +120,8 @@ void	ObjParser::buildVertices(void)
 
 	for (size_t i = 0; i < faces.size(); i += 3)
 	{
-		float	gray = static_cast<float>(i / 3) / (faces.size() / 3);
+		int		triangleIndex = i / 3;
+		float	gray = faceColors[triangleIndex % 3];
 
 		bool	hasAllNormals =
 				faces[i].vn >= 0 &&

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <array>
 
 #include "math/Vec3.hpp"
 
@@ -38,6 +39,8 @@ private:
 	std::vector<float>			vertices;
 	std::vector<unsigned int>	indices;
 	Vec3						center;
+
+	std::array<float, 3>	faceColors{0.45f, 0.5f, 0.55f};
 
 	void	parse(std::string const &filePath);
 	void	parseFile(const std::string &filePath);
