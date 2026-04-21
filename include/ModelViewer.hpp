@@ -79,6 +79,9 @@ private:
 	bool	rotating = true;
 	bool	spaceKeyPressed = false;
 
+	bool	wireframe = false;
+	bool	fKeyPressed = false;
+
 	int		vertexCount;
 
 	Mat4	rotationMatrix = Mat4::identity();

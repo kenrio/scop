@@ -179,6 +179,7 @@ void	ModelViewer::processInput(void)
 	handleToggle(GLFW_KEY_L, lKeyPressed, lightingMode);
 	handleToggle(GLFW_KEY_U, uKeyPressed, uvMode);
 	handleToggle(GLFW_KEY_SPACE, spaceKeyPressed, rotating);
+	handleToggle(GLFW_KEY_F, fKeyPressed, wireframe);
 
 	return ;
 }
@@ -314,6 +315,7 @@ void	ModelViewer::renderScene(void)
 	shader->setInt("ourTexture", 0);
 
 	glBindVertexArray(VAO);
+	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
 	return ;
