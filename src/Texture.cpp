@@ -144,8 +144,12 @@ unsigned char *	Texture::loadBMP(const std::string &path, int &width, int &heigh
 
 void	Texture::reload(const std::string &newPath, bool generateMipmap)
 {
+	std::cout << "Loading texture: " << newPath << "..." << std::endl;
+
 	glDeleteTextures(1, &ID);
 	load(newPath, generateMipmap);
+
+	std::cout << "Texture loaded" << std::endl;
 
 	return ;
 }

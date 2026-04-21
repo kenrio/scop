@@ -28,7 +28,26 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	axisShader = new Shader("shaders/axis_vertex.glsl", "shaders/axis_fragment.glsl");
 
 	objFiles = findFiles("resources", ".obj");
+	std::string	objFilename = std::filesystem::path(objPath).filename().string();
+	for (int i = 0; i < (int)objFiles.size(); ++i)
+	{
+		if (objFiles[i] == objFilename)
+		{
+			currentObjIndex = i;
+			break ;
+		}
+	}
+
 	bmpFiles = findFiles("resources", ".bmp");
+	std::string	texFilename = std::filesystem::path(TEXTURE_PATH).filename().string();
+	for (int i = 0; i < (int)bmpFiles.size(); ++i)
+	{
+		if (bmpFiles[i] == texFilename)
+		{
+			currentBmpIndex = i;
+			break ;
+		}
+	}
 
 	modelPositionCount = objParser.getPositionCount();
 	modelFaceCount = objParser.getFaceCount();
@@ -285,7 +304,7 @@ void	ModelViewer::resetView(void)
 
 void	ModelViewer::render(void)
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	renderGUI();
@@ -321,7 +340,8 @@ void	ModelViewer::renderGUI(void)
 		ImGui::EndCombo();
 	}
 
-	if (ImGui::BeginCombo("Texture", bmpFiles[currentBmpIndex].c_str()))
+	std::string	texLable = textureMode ? bmpFiles[currentBmpIndex].c_str() : "None";
+	if (ImGui::BeginCombo("Texture", texLable.c_str()))
 	{
 		for (int i = 0; i < (int)bmpFiles.size(); ++i)
 		{
@@ -477,7 +497,7 @@ void	ModelViewer::renderScene(void)
 		normalShader->setMat4("model", model);
 		normalShader->setMat4("view", view);
 		normalShader->setMat4("projection", projection);
-		normalShader->setVec3("lineColor", Vec3(1.0f, 0.0f, 0.0f));
+		normalShader->setVec3("lineColor", Vec3(0.0f, 1.0f, 1.0f));
 
 		glBindVertexArray(normalVAO);
 		glDrawArrays(GL_LINES, 0, normalVertexCount);
@@ -597,6 +617,8 @@ void	ModelViewer::loadModel(const std::string &filename)
 {
 	std::string	path = "resources/" + filename;
 
+	std::cout << "Loading model: " << filename << "..." << std::endl;
+
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
 
@@ -607,9 +629,12 @@ void	ModelViewer::loadModel(const std::string &filename)
 	rotationMatrix = Mat4::identity();
 	rotationAngle = 0.0f;
 	objPos = Vec3(0.0f, 0.0f, 0.0f);
+	zoom = DEFAULT_ZOOM;
 
 	modelPositionCount = parser.getPositionCount();
 	modelFaceCount = parser.getFaceCount();
+
+	std::cout << "Model loaded" << std::endl;
 	
 	return ;
 }

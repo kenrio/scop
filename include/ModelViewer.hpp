@@ -14,9 +14,11 @@
 #include "Shader.hpp"
 #include "KeyInputHandler.hpp"
 
-float const			WINDOW_WIDTH = 800.0f;
-float const			WINDOW_HEIGHT = 600.0f;
+float const			WINDOW_WIDTH = 1280.0f;
+float const			WINDOW_HEIGHT = 1024.0f;
 std::string const	WINDOW_TITLE = "scop";
+
+Vec3 const		BACKGROUND_COLOR = {0.25f, 0.25f, 0.25f};
 
 float const		FOV = 0.785f;
 float const		NEAR_PLANE = 0.1f;
@@ -25,7 +27,7 @@ float const		FAR_PLANE = 3000.0f;
 float const		ROTATION_SPEED = 0.01f;
 float const		MOUSE_SENSITIVITY = 0.01f;
 float const		SCROLL_SENSITIVITY = 0.01f;
-float const		DEFAULT_ZOOM = 5.0f;
+float const		DEFAULT_ZOOM = 10.0f;
 float const		ZOOM_MIN = 1.0f;
 float const		ZOOM_MAX = 2000.0f;
 float const		MOVE_SPEED = 0.02f;
