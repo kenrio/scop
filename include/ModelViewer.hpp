@@ -102,6 +102,7 @@ private:
 
 	void	processInput(void);
 	void	handleToggle(int key, bool &keyPressed, bool &mode);
+	void	resetView(void);
 
 	void	render(void);
 	void	renderGUI(void);

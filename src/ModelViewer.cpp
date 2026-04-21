@@ -183,6 +183,7 @@ void	ModelViewer::processInput(void)
 	if (keyInput->isPressed(GLFW_KEY_D)) objPos.x += MOVE_SPEED;
 	if (keyInput->isPressed(GLFW_KEY_Q)) objPos.y -= MOVE_SPEED;
 	if (keyInput->isPressed(GLFW_KEY_E)) objPos.y += MOVE_SPEED;
+	if (keyInput->isPressed(GLFW_KEY_R)) resetView();
 
 	handleToggle(GLFW_KEY_T, tKeyPressed, textureMode);
 	handleToggle(GLFW_KEY_L, lKeyPressed, lightingMode);
@@ -204,6 +205,16 @@ void	ModelViewer::handleToggle(int key, bool &keyPressed, bool &mode)
 	}
 	else
 		keyPressed = false;
+
+	return ;
+}
+
+void	ModelViewer::resetView(void)
+{
+	objPos = Vec3(0.0f, 0.0f, 0.0f);
+	rotationMatrix = Mat4::identity();
+	rotationAngle = 0.0f;
+	zoom = DEFAULT_ZOOM;
 
 	return ;
 }
