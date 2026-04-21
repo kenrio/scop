@@ -40,6 +40,14 @@ std::string const	TEXTURE_PATH = "resources/snoutBeetle.bmp";
 std::string const	VERTEX_SHADER = "shaders/vertex.glsl";
 std::string const	FRAGMENT_SHADER = "shaders/fragment.glsl";
 
+struct ToggleState
+{
+	bool	mode = false;
+	bool	keyPressed = false;
+	float	value = 0.0f;
+};
+
+
 class	ModelViewer
 {
 
@@ -54,7 +62,6 @@ public:
 private:
 
 	bool			valid;
-
 	GLFWwindow *	window;
 
 	unsigned int	VAO = 0;
@@ -62,33 +69,27 @@ private:
 
 	Texture *			texture = nullptr;
 	Shader *			shader = nullptr;
+	Shader *			normalShader = nullptr;
+	Shader *			axisShader = nullptr;
 	KeyInputHandler *	keyInput = nullptr;
 	
 	Vec3	objPos;
-	
-	float	mixValue = 0.0f;
-	bool	textureMode = false;
-	bool	tKeyPressed = false;
-	
-	float	lightingValue = 0.0f;
-	bool	lightingMode = false;
-	bool	lKeyPressed = false;
-	
-	float	uvModeValue = 0.0f;
-	bool	uvMode = false;
-	bool	uKeyPressed = false;
+	int		modelPositionCount = 0;
+	int		modelFaceCount = 0;
+
+	ToggleState	textureToggle;
+	ToggleState	lightingToggle;
+	ToggleState	uvToggle;
+	bool		wireframe = false;
+	bool		fKeyPressed = false;
+	bool		showNormals = false;
+	bool		nKeyPressed = false;
 	
 	float	rotationAngle = 0.0f;
 	bool	rotating = true;
 	bool	spaceKeyPressed = false;
 	
-	bool	wireframe = false;
-	bool	fKeyPressed = false;
-	
 	int		vertexCount;
-	
-	int		modelPositionCount = 0;
-	int		modelFaceCount = 0;
 	
 	Mat4	rotationMatrix = Mat4::identity();
 	
@@ -102,16 +103,10 @@ private:
 	unsigned int	normalVAO = 0;
 	unsigned int	normalVBO = 0;
 
-	Shader *		normalShader = nullptr;
-
 	int				normalVertexCount = 0;
-	bool			showNormals = false;
-	bool			nKeyPressed = false;
 	
 	unsigned int	axisVAO = 0;
 	unsigned int	axisVBO = 0;
-
-	Shader *		axisShader = nullptr;
 
 	std::vector<std::string>	objFiles;
 	std::vector<std::string>	bmpFiles;

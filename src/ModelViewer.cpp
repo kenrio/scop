@@ -266,9 +266,9 @@ void	ModelViewer::processInput(void)
 	if (keyInput->isPressed(GLFW_KEY_E)) objPos.y += MOVE_SPEED;
 	if (keyInput->isPressed(GLFW_KEY_R)) resetView();
 
-	handleToggle(GLFW_KEY_T, tKeyPressed, textureMode);
-	handleToggle(GLFW_KEY_L, lKeyPressed, lightingMode);
-	handleToggle(GLFW_KEY_U, uKeyPressed, uvMode);
+	handleToggle(GLFW_KEY_T, textureToggle.keyPressed, textureToggle.mode);
+	handleToggle(GLFW_KEY_L, lightingToggle.keyPressed, lightingToggle.mode);
+	handleToggle(GLFW_KEY_U, uvToggle.keyPressed, uvToggle.mode);
 	handleToggle(GLFW_KEY_SPACE, spaceKeyPressed, rotating);
 	handleToggle(GLFW_KEY_F, fKeyPressed, wireframe);
 	handleToggle(GLFW_KEY_N, nKeyPressed, showNormals);
@@ -340,7 +340,7 @@ void	ModelViewer::renderGUI(void)
 		ImGui::EndCombo();
 	}
 
-	std::string	texLable = textureMode ? bmpFiles[currentBmpIndex].c_str() : "None";
+	std::string	texLable = textureToggle.mode ? bmpFiles[currentBmpIndex].c_str() : "None";
 	if (ImGui::BeginCombo("Texture", texLable.c_str()))
 	{
 		for (int i = 0; i < (int)bmpFiles.size(); ++i)
@@ -366,9 +366,9 @@ void	ModelViewer::renderGUI(void)
 
 	ImGui::Separator();
 
-	ImGui::Text("Texture: %s", textureMode ? "ON": "OFF");
-	ImGui::Text("Lighting: %s", lightingMode ? "ON": "OFF");
-	ImGui::Text("OBJ UV: %s", uvMode ? "ON": "OFF");
+	ImGui::Text("Texture: %s", textureToggle.mode ? "ON": "OFF");
+	ImGui::Text("Lighting: %s", lightingToggle.mode ? "ON": "OFF");
+	ImGui::Text("OBJ UV: %s", uvToggle.mode ? "ON": "OFF");
 	ImGui::Text("Wireframe: %s", wireframe ? "ON": "OFF");
 	ImGui::Text("Normals: %s", showNormals ? "ON": "OFF");
 	ImGui::Text("Rotation: %s", rotating ? "ON": "OFF");
@@ -439,9 +439,9 @@ void	ModelViewer::renderAxis(void)
 
 void	ModelViewer::updateTransitions(void)
 {
-	smoothTransition(textureMode, mixValue, TRANSITION_SPEED);
-	smoothTransition(lightingMode, lightingValue, TRANSITION_SPEED);
-	smoothTransition(uvMode, uvModeValue, TRANSITION_SPEED);
+	smoothTransition(textureToggle.mode, textureToggle.value, TRANSITION_SPEED);
+	smoothTransition(lightingToggle.mode, lightingToggle.value, TRANSITION_SPEED);
+	smoothTransition(uvToggle.mode, uvToggle.value, TRANSITION_SPEED);
 
 	if (rotating)
 	{
@@ -480,9 +480,9 @@ void	ModelViewer::renderScene(void)
 	shader->setMat4("model", model);
 	shader->setMat4("view", view);
 	shader->setMat4("projection", projection);
-	shader->setFloat("mixValue", mixValue);
-	shader->setFloat("lightingValue", lightingValue);
-	shader->setFloat("uvMode", uvModeValue);
+	shader->setFloat("mixValue", textureToggle.value);
+	shader->setFloat("lightingValue", lightingToggle.value);
+	shader->setFloat("uvMode", uvToggle.value);
 
 	texture->bind(0);
 	shader->setInt("ourTexture", 0);
