@@ -54,47 +54,46 @@ private:
 
 	GLFWwindow *	window;
 
-	unsigned int	VAO;
-	unsigned int	VBO;
+	unsigned int	VAO = 0;
+	unsigned int	VBO = 0;
 
-	Texture *			texture;
-	Shader *			shader;
-	KeyInputHandler *	keyInput;
+	Texture *			texture = nullptr;
+	Shader *			shader = nullptr;
+	KeyInputHandler *	keyInput = nullptr;
 
 	Vec3	objPos;
 
-	float	mixValue;
-	bool	textureMode;
-	bool	tKeyPressed;
+	float	mixValue = 0.0f;
+	bool	textureMode = false;
+	bool	tKeyPressed = false;
 
-	float	lightingValue;
-	bool	lightingMode;
-	bool	lKeyPressed;
+	float	lightingValue = 0.0f;
+	bool	lightingMode = false;
+	bool	lKeyPressed = false;
 
-	float	uvModeValue;
-	bool	uvMode;
-	bool	uKeyPressed;
+	float	uvModeValue = 0.0f;
+	bool	uvMode = false;
+	bool	uKeyPressed = false;
 
-	float	rotationAngle;
-	bool	rotating;
-	bool	spaceKeyPressed;
+	float	rotationAngle = 0.0f;
+	bool	rotating = true;
+	bool	spaceKeyPressed = false;
 
 	int		vertexCount;
 
-	Mat4	rotationMatrix;
+	Mat4	rotationMatrix = Mat4::identity();
 
-	float	mouseLastX;
-	float	mouseLastY;
-	bool	mouseDragging;
+	float	mouseLastX = 0.0f;
+	float	mouseLastY = 0.0f;
+	bool	mouseDragging = false;
+	bool	mousePanning = false;
 
-	bool	mousePanning;
-
-	float	zoom;
+	float	zoom = DEFAULT_ZOOM;
 
 	std::vector<std::string>	objFiles;
 	std::vector<std::string>	bmpFiles;
-	int							currentObjIndex;
-	int							currentBmpIndex;
+	int							currentObjIndex = 0;
+	int							currentBmpIndex = 0;
 
 	void	initWindow(void);
 	void	initGL(void);

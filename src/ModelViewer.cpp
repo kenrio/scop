@@ -2,16 +2,6 @@
 
 
 ModelViewer::ModelViewer(const std::string &objPath)
-:
-VAO(0), VBO(0), texture(nullptr), shader(nullptr), keyInput(nullptr),
-mixValue(0.0f), textureMode(false), tKeyPressed(false),
-lightingValue(0.0f), lightingMode(false), lKeyPressed(false),
-uvModeValue(0.0f), uvMode(false), uKeyPressed(false),
-rotationAngle(0.0f), rotating(true), spaceKeyPressed(false),
-rotationMatrix(Mat4::identity()),
-mouseLastX(0.0f), mouseLastY(0.0f),
-mouseDragging(false), mousePanning(false),
-zoom(DEFAULT_ZOOM), currentObjIndex(0), currentBmpIndex(0)
 {
 	initWindow();
 	initGL();
