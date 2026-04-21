@@ -529,24 +529,24 @@ void	ModelViewer::mousePositionCallback(GLFWwindow * window, double xpos, double
 
 	ModelViewer *	viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
-	float	dx = (float)xpos - viewer->mouseLastX;
-	float	dy = (float)ypos - viewer->mouseLastY;
+	float	dx = (float)xpos - viewer->mouse.lastX;
+	float	dy = (float)ypos - viewer->mouse.lastY;
 
-	if (viewer->mouseDragging)
+	if (viewer->mouse.dragging)
 	{
 		Mat4	rotX = Mat4::rotate(Mat4::identity(), dy * MOUSE_SENSITIVITY, Vec3(1.0f, 0.0f, 0.0f));
 		Mat4	rotY = Mat4::rotate(Mat4::identity(), dx * MOUSE_SENSITIVITY, Vec3(0.0f, 1.0f, 0.0f));
 
 		viewer->rotationMatrix = rotX * rotY * viewer->rotationMatrix;
 	}
-	else if (viewer->mousePanning)
+	else if (viewer->mouse.panning)
 	{
 		viewer->objPos.x += dx * MOUSE_SENSITIVITY;
 		viewer->objPos.y -= dy * MOUSE_SENSITIVITY;
 	}
 
-	viewer->mouseLastX = (float)xpos;
-	viewer->mouseLastY = (float)ypos;
+	viewer->mouse.lastX = (float)xpos;
+	viewer->mouse.lastY = (float)ypos;
 
 	return ;
 }
@@ -566,23 +566,23 @@ void	ModelViewer::mouseButtonCallback(GLFWwindow * window, int button, int actio
 	{
 		if (action == GLFW_PRESS)
 		{
-			viewer->mouseDragging = true;
-			viewer->mouseLastX = (float)x;
-			viewer->mouseLastY = (float)y;
+			viewer->mouse.dragging = true;
+			viewer->mouse.lastX = (float)x;
+			viewer->mouse.lastY = (float)y;
 		}
 		else if (action == GLFW_RELEASE)
-			viewer->mouseDragging = false;
+			viewer->mouse.dragging = false;
 	}
 	else if (button == GLFW_MOUSE_BUTTON_RIGHT)
 	{
 		if (action == GLFW_PRESS)
 		{
-			viewer->mousePanning = true;
-			viewer->mouseLastX = (float)x;
-			viewer->mouseLastY = (float)y;
+			viewer->mouse.panning = true;
+			viewer->mouse.lastX = (float)x;
+			viewer->mouse.lastY = (float)y;
 		}
 		else if (action == GLFW_RELEASE)
-			viewer->mousePanning = false;
+			viewer->mouse.panning = false;
 	}
 
 	return ;

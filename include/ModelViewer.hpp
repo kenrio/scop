@@ -54,6 +54,15 @@ struct ToggleState
 	float	value = 0.0f;
 };
 
+struct MouseState
+{
+	float	lastX = 0.0f;
+	float	lastY = 0.0f;
+	bool	dragging = false;
+	bool	panning = false;
+};
+
+
 
 class	ModelViewer
 {
@@ -93,19 +102,14 @@ private:
 	bool		showNormals = false;
 	bool		nKeyPressed = false;
 	
+	Mat4	rotationMatrix = Mat4::identity();
 	float	rotationAngle = 0.0f;
 	bool	rotating = true;
 	bool	spaceKeyPressed = false;
 	
-	Mat4	rotationMatrix = Mat4::identity();
+	MouseState	mouse;
+	float		zoom = DEFAULT_ZOOM;
 	
-	float	mouseLastX = 0.0f;
-	float	mouseLastY = 0.0f;
-	bool	mouseDragging = false;
-	bool	mousePanning = false;
-	
-	float	zoom = DEFAULT_ZOOM;
-
 	std::vector<std::string>	objFiles;
 	std::vector<std::string>	bmpFiles;
 	int							currentObjIndex = 0;
