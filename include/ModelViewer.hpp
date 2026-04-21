@@ -93,6 +93,12 @@ private:
 
 	float	zoom = DEFAULT_ZOOM;
 
+	unsigned int	normalVAO = 0;
+	unsigned int	normalVBO = 0;
+	int				normalVertexCount = 0;
+	bool			showNormals = false;
+	bool			nKeyPressed = false;
+
 	std::vector<std::string>	objFiles;
 	std::vector<std::string>	bmpFiles;
 	int							currentObjIndex = 0;
@@ -101,6 +107,7 @@ private:
 	void	initWindow(void);
 	void	initGL(void);
 	void	setBuffers(const ObjParser &parser);
+	void	setNormalBuffers(const ObjParser &parser);
 
 	void	processInput(void);
 	void	handleToggle(int key, bool &keyPressed, bool &mode);

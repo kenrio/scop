@@ -16,6 +16,7 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	valid = true;
 
 	setBuffers(objParser);
+	setNormalBuffers(objParser);
 
 	texture = new Texture(TEXTURE_PATH);
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
@@ -160,6 +161,29 @@ void	ModelViewer::setBuffers(const ObjParser &parser)
 	return ;
 }
 
+void	ModelViewer::setNormalBuffers(const ObjParser &parser)
+{
+	std::vector<float> const &	lines = parser.getNormalLines();
+	normalVertexCount = lines.size() / 3;
+
+	if (normalVertexCount == 0)
+		return ;
+
+	glGenBuffers(1, &normalVBO);
+	glGenVertexArrays(1, &normalVAO);
+
+	glBindVertexArray(normalVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(float), lines.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+
+	return ;
+}
+
 void	ModelViewer::processInput(void)
 {
 	keyInput->update();
@@ -180,6 +204,7 @@ void	ModelViewer::processInput(void)
 	handleToggle(GLFW_KEY_U, uKeyPressed, uvMode);
 	handleToggle(GLFW_KEY_SPACE, spaceKeyPressed, rotating);
 	handleToggle(GLFW_KEY_F, fKeyPressed, wireframe);
+	handleToggle(GLFW_KEY_N, nKeyPressed, showNormals);
 
 	return ;
 }
@@ -318,6 +343,15 @@ void	ModelViewer::renderScene(void)
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
+	if (showNormals && normalVertexCount > 0)
+	{
+		shader->setFloat("mixValue", 0.0f);
+		shader->setFloat("lightingValue", 0.0f);
+
+		glBindVertexArray(normalVAO);
+		glDrawArrays(GL_LINES, 0, normalVertexCount);
+	}
+
 	return ;
 }
 
@@ -435,6 +469,7 @@ void	ModelViewer::loadModel(const std::string &filename)
 
 	ObjParser	parser(path);
 	setBuffers(parser);
+	setNormalBuffers(parser);
 
 	rotationMatrix = Mat4::identity();
 	rotationAngle = 0.0f;

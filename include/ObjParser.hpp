@@ -10,6 +10,8 @@
 
 #include "math/Vec3.hpp"
 
+const float	NORMAL_LENGTH = 0.2;
+
 struct	FaceVertex
 {
 	int	v;
@@ -28,6 +30,8 @@ public:
 	std::vector<unsigned int> const	&getIndices(void) const;
 	Vec3							getCenter(void) const;
 
+	std::vector<float> const		&getNormalLines(void) const;
+
 	bool	isValid(void) const;
 
 private:
@@ -40,7 +44,9 @@ private:
 	std::vector<unsigned int>	indices;
 	Vec3						center;
 
-	std::array<float, 3>	faceColors{0.45f, 0.5f, 0.55f};
+	std::vector<float>			normalLines;
+
+	std::array<float, 3>		faceColors{0.45f, 0.5f, 0.55f};
 
 	void	parse(std::string const &filePath);
 	void	parseFile(const std::string &filePath);

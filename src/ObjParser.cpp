@@ -32,6 +32,11 @@ Vec3	ObjParser::getCenter(void) const
 	return (Vec3(center.x / n, center.y / n, center.z / n));
 }
 
+std::vector<float> const &	ObjParser::getNormalLines(void) const
+{
+	return (normalLines);
+}
+
 bool	ObjParser::isValid(void) const
 {
 	return (!positions.empty() && !faces.empty());
@@ -123,6 +128,10 @@ void	ObjParser::buildVertices(void)
 		int		triangleIndex = i / 3;
 		float	gray = faceColors[triangleIndex % 3];
 
+		Vec3	&posA = positions[faces[i].v];
+		Vec3	&posB = positions[faces[i + 1].v];
+		Vec3	&posC = positions[faces[i + 2].v];
+
 		bool	hasAllNormals =
 				faces[i].vn >= 0 &&
 				faces[i + 1].vn >= 0 &&
@@ -130,13 +139,30 @@ void	ObjParser::buildVertices(void)
 
 		Vec3	faceNormal;
 		if (!hasAllNormals)
-		{
-			Vec3	&posA = positions[faces[i].v];
-			Vec3	&posB = positions[faces[i + 1].v];
-			Vec3	&posC = positions[faces[i + 2].v];
 			faceNormal = Vec3::cross(posB - posA, posC - posA).normalize();
+
+		Vec3	faceCenter(
+							(posA.x + posB.x + posC.x) / 3.0f,
+							(posA.y + posB.y + posC.y) / 3.0f,
+							(posA.z + posB.z + posC.z) / 3.0f);
+
+		Vec3	displayNormal = faceNormal;
+		if (hasAllNormals)
+		{
+			displayNormal = (
+							normals[faces[i].vn] +
+							normals[faces[i + 1].vn] +
+							normals[faces[i + 2].vn]) * (1.0f / 3.0f);
+			displayNormal = displayNormal.normalize();
 		}
 
+		normalLines.push_back(faceCenter.x);
+		normalLines.push_back(faceCenter.y);
+		normalLines.push_back(faceCenter.z);
+
+		normalLines.push_back(faceCenter.x + displayNormal.x * NORMAL_LENGTH);
+		normalLines.push_back(faceCenter.y + displayNormal.y * NORMAL_LENGTH);
+		normalLines.push_back(faceCenter.z + displayNormal.z * NORMAL_LENGTH);
 
 		for (int j = 0; j < 3; ++j)
 		{
