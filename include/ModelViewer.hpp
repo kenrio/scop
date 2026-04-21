@@ -61,6 +61,8 @@ private:
 	Shader *			shader = nullptr;
 	KeyInputHandler *	keyInput = nullptr;
 
+	Shader *			normalShader = nullptr;
+
 	Vec3	objPos;
 
 	float	mixValue = 0.0f;

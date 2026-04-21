@@ -23,6 +23,8 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	shader->use();
 	keyInput = new KeyInputHandler(window);
 
+	normalShader = new Shader("shaders/normal_vertex.glsl", "shaders/normal_fragment.glsl");
+
 	objFiles = findFiles("resources", ".obj");
 	bmpFiles = findFiles("resources", ".bmp");
 
@@ -35,6 +37,8 @@ ModelViewer::~ModelViewer()
 	delete shader;
 	delete texture;
 	delete keyInput;
+
+	delete normalShader;
 
 	if (VAO)
 		glDeleteVertexArrays(1, &VAO);
@@ -345,11 +349,16 @@ void	ModelViewer::renderScene(void)
 
 	if (showNormals && normalVertexCount > 0)
 	{
-		shader->setFloat("mixValue", 0.0f);
-		shader->setFloat("lightingValue", 0.0f);
+		normalShader->use();
+		normalShader->setMat4("model", model);
+		normalShader->setMat4("view", view);
+		normalShader->setMat4("projection", projection);
+		normalShader->setVec3("lineColor", Vec3(1.0f, 0.0f, 0.0f));
 
 		glBindVertexArray(normalVAO);
 		glDrawArrays(GL_LINES, 0, normalVertexCount);
+
+		shader->use();
 	}
 
 	return ;
