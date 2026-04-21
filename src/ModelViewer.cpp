@@ -245,7 +245,7 @@ void	ModelViewer::setAxisBuffers(void)
 	glBindVertexArray(axisBuf.VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, axisBuf.VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(axisData), axisData, GL_STATIC_DRAW);
-\
+
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
@@ -314,8 +314,9 @@ void	ModelViewer::render(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	renderGUI();
-	renderAxis();
 	updateTransitions();
+	updateMatrices();
+	renderAxis();
 	renderScene();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -346,8 +347,8 @@ void	ModelViewer::renderGUI(void)
 		ImGui::EndCombo();
 	}
 
-	std::string	texLable = textureToggle.mode ? bmpFiles[currentBmpIndex].c_str() : "None";
-	if (ImGui::BeginCombo("Texture", texLable.c_str()))
+	std::string	texLabel = textureToggle.mode ? bmpFiles[currentBmpIndex].c_str() : "None";
+	if (ImGui::BeginCombo("Texture", texLabel.c_str()))
 	{
 		for (int i = 0; i < (int)bmpFiles.size(); ++i)
 		{
@@ -418,22 +419,19 @@ void	ModelViewer::renderAxis(void)
 	glViewport(width - axisSize, height - axisSize, axisSize, axisSize);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-    // 正方形のアスペクト比で投影
-	Mat4	projection = Mat4::perspective(FOV, 1.0f, 0.1f, 100.0f);
-	Mat4	view = Mat4::translate(Mat4::identity(), Vec3(0.0f, 0.0f, -3.0f));
-
-    // モデルの回転だけ適用（位置とズームは無視）
-	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
-	Mat4	model = rotationMatrix * autoRot;
+    Mat4 axisView = Mat4::translate(Mat4::identity(), Vec3(0.0f, 0.0f, -3.0f));
+    Mat4 axisProjection = Mat4::perspective(FOV, 1.0f, 0.1f, 100.0f);
+    Mat4 autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
+    Mat4 axisModel = rotationMatrix * autoRot;
 
 	axisShader->use();
-	axisShader->setMat4("model", model);
-	axisShader->setMat4("view", view);
-	axisShader->setMat4("projection", projection);
+	axisShader->setMat4("model", axisModel);
+	axisShader->setMat4("view", axisView);
+	axisShader->setMat4("projection", axisProjection);
 
 	glLineWidth(2.0f);
 	glBindVertexArray(axisBuf.VAO);
-	glDrawArrays(GL_LINES, 0, 6);
+	glDrawArrays(GL_LINES, 0, axisBuf.vertexCount);
 
     // ビューポートを元に戻す
 	glViewport(0, 0, width, height);
@@ -454,6 +452,8 @@ void	ModelViewer::updateTransitions(void)
 		rotationAngle += ROTATION_SPEED;
 		rotationAngle = std::fmod(rotationAngle, 2.0f * M_PI);
 	}
+
+	return ;
 }
 
 void	ModelViewer::smoothTransition(bool mode, float &value, float speed)
@@ -467,25 +467,31 @@ void	ModelViewer::smoothTransition(bool mode, float &value, float speed)
 	return ;
 }
 
+void	ModelViewer::updateMatrices(void)
+{
+	int	width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	float	aspect = (float)width / (float)height;
+
+	currentView = Mat4::translate(Mat4::identity(), Vec3(0.0f, 0.0f, -zoom));
+	currentProjection = Mat4::perspective(FOV, aspect, NEAR_PLANE, FAR_PLANE);
+
+	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
+	currentModel = Mat4::translate(Mat4::identity(), objPos);
+	currentModel = currentModel * rotationMatrix * autoRot;
+
+	return ;
+}
+
 void	ModelViewer::renderScene(void)
 {
 	int		width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	float	aspect = (float)width / (float)height;
-
-	Mat4	view = Mat4::identity();
-	view = Mat4::translate(view, Vec3(0.0f, 0.0f, -zoom));
-	Mat4	projection = Mat4::perspective(FOV, aspect, NEAR_PLANE, FAR_PLANE);
-
-	Mat4	model = Mat4::identity();
-	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
-	model = Mat4::translate(model, objPos);
-	model = model * rotationMatrix * autoRot;
 
 	shader->use();
-	shader->setMat4("model", model);
-	shader->setMat4("view", view);
-	shader->setMat4("projection", projection);
+	shader->setMat4("model", currentModel);
+	shader->setMat4("view", currentView);
+	shader->setMat4("projection", currentProjection);
 	shader->setFloat("mixValue", textureToggle.value);
 	shader->setFloat("lightingValue", lightingToggle.value);
 	shader->setFloat("uvMode", uvToggle.value);
@@ -500,9 +506,9 @@ void	ModelViewer::renderScene(void)
 	if (showNormals && normalBuf.vertexCount > 0)
 	{
 		normalShader->use();
-		normalShader->setMat4("model", model);
-		normalShader->setMat4("view", view);
-		normalShader->setMat4("projection", projection);
+		normalShader->setMat4("model", currentModel);
+		normalShader->setMat4("view", currentView);
+		normalShader->setMat4("projection", currentProjection);
 		normalShader->setVec3("lineColor", Vec3(0.0f, 1.0f, 1.0f));
 
 		glBindVertexArray(normalBuf.VAO);
@@ -596,7 +602,7 @@ void ModelViewer::scrollCallback(GLFWwindow *window, double xoffset, double yoff
     (void)xoffset;
     ModelViewer *viewer = (ModelViewer *)glfwGetWindowUserPointer(window);
 
-    viewer->zoom -= (float)yoffset * 0.5f;
+    viewer->zoom -= (float)yoffset * SCROLL_SENSITIVITY;
 
     if (viewer->zoom < ZOOM_MIN) viewer->zoom = ZOOM_MIN;
     if (viewer->zoom > ZOOM_MAX) viewer->zoom = ZOOM_MAX;
@@ -625,8 +631,8 @@ void	ModelViewer::loadModel(const std::string &filename)
 
 	std::cout << "Loading model: " << filename << "..." << std::endl;
 
-	glDeleteBuffers(1, &modelBuf.VBO);
-	glDeleteVertexArrays(1, &modelBuf.VAO);
+	deleteBuffers(modelBuf);
+	deleteBuffers(normalBuf);
 
 	ObjParser	parser(path);
 	setBuffers(parser);

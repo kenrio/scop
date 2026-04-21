@@ -26,7 +26,7 @@ float const		FAR_PLANE = 3000.0f;
 
 float const		ROTATION_SPEED = 0.01f;
 float const		MOUSE_SENSITIVITY = 0.01f;
-float const		SCROLL_SENSITIVITY = 0.01f;
+float const		SCROLL_SENSITIVITY = 0.5f;
 float const		DEFAULT_ZOOM = 10.0f;
 float const		ZOOM_MIN = 1.0f;
 float const		ZOOM_MAX = 2000.0f;
@@ -61,8 +61,6 @@ struct MouseState
 	bool	dragging = false;
 	bool	panning = false;
 };
-
-
 
 class	ModelViewer
 {
@@ -101,6 +99,10 @@ private:
 	bool		fKeyPressed = false;
 	bool		showNormals = false;
 	bool		nKeyPressed = false;
+
+	Mat4	currentModel;
+	Mat4	currentView;
+	Mat4	currentProjection;
 	
 	Mat4	rotationMatrix = Mat4::identity();
 	float	rotationAngle = 0.0f;
@@ -128,9 +130,10 @@ private:
 
 	void	render(void);
 	void	renderGUI(void);
-	void	renderAxis(void);
 	void	updateTransitions(void);
 	void	smoothTransition(bool mode, float &value, float speed);
+	void	updateMatrices(void);
+	void	renderAxis(void);
 	void	renderScene(void);
 
 	static void	framebufferSizeCallback(GLFWwindow * window, int w, int h);
