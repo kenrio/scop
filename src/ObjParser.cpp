@@ -37,6 +37,16 @@ std::vector<float> const &	ObjParser::getNormalLines(void) const
 	return (normalLines);
 }
 
+int	ObjParser::getPositionCount(void) const
+{
+	return (positions.size());
+}
+
+int	ObjParser::getFaceCount(void) const
+{
+	return (faces.size() / 3);
+}
+
 bool	ObjParser::isValid(void) const
 {
 	return (!positions.empty() && !faces.empty());

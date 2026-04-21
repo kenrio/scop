@@ -32,6 +32,9 @@ public:
 
 	std::vector<float> const		&getNormalLines(void) const;
 
+	int	getPositionCount(void) const;
+	int	getFaceCount(void) const;
+
 	bool	isValid(void) const;
 
 private:

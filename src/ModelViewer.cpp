@@ -17,6 +17,7 @@ ModelViewer::ModelViewer(const std::string &objPath)
 
 	setBuffers(objParser);
 	setNormalBuffers(objParser);
+	setAxisBuffers();
 
 	texture = new Texture(TEXTURE_PATH);
 	shader = new Shader(VERTEX_SHADER, FRAGMENT_SHADER);
@@ -24,9 +25,13 @@ ModelViewer::ModelViewer(const std::string &objPath)
 	keyInput = new KeyInputHandler(window);
 
 	normalShader = new Shader("shaders/normal_vertex.glsl", "shaders/normal_fragment.glsl");
+	axisShader = new Shader("shaders/axis_vertex.glsl", "shaders/axis_fragment.glsl");
 
 	objFiles = findFiles("resources", ".obj");
 	bmpFiles = findFiles("resources", ".bmp");
+
+	modelPositionCount = objParser.getPositionCount();
+	modelFaceCount = objParser.getFaceCount();
 
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -34,16 +39,22 @@ ModelViewer::ModelViewer(const std::string &objPath)
 
 ModelViewer::~ModelViewer()
 {
-	delete shader;
-	delete texture;
-	delete keyInput;
+	delete	shader;
+	delete	texture;
+	delete	keyInput;
 
-	delete normalShader;
+	delete	normalShader;
+	delete	axisShader;
 
 	if (VAO)
 		glDeleteVertexArrays(1, &VAO);
 	if (VBO)
 		glDeleteBuffers(1, &VBO);
+
+	if (axisVAO)	
+		glDeleteVertexArrays(1, &axisVAO);
+	if (axisVBO)
+		glDeleteBuffers(1, &axisVBO);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -188,6 +199,39 @@ void	ModelViewer::setNormalBuffers(const ObjParser &parser)
 	return ;
 }
 
+void	ModelViewer::setAxisBuffers(void)
+{
+	float axisData[] =
+	{
+		// X軸（赤）
+		0.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+		// Y軸（緑）
+		0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,
+		// Z軸（青）
+		0.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+    };
+
+	glGenVertexArrays(1, &axisVAO);
+	glGenBuffers(1, &axisVBO);
+
+	glBindVertexArray(axisVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(axisData), axisData, GL_STATIC_DRAW);
+\
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0);
+
+	return ;
+}
+
 void	ModelViewer::processInput(void)
 {
 	keyInput->update();
@@ -245,6 +289,7 @@ void	ModelViewer::render(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	renderGUI();
+	renderAxis();
 	updateTransitions();
 	renderScene();
 
@@ -290,8 +335,84 @@ void	ModelViewer::renderGUI(void)
 		ImGui::EndCombo();
 	}
 
+	ImGui::Separator();
+
+	ImGui::Text("Vertices: %d", modelPositionCount);
+	ImGui::Text("Faces: %d", modelFaceCount);
+
+	ImGui::Separator();
+
+	ImGui::Text("FPS: %.0f", ImGui::GetIO().Framerate);
+
+	ImGui::Separator();
+
+	ImGui::Text("Texture: %s", textureMode ? "ON": "OFF");
+	ImGui::Text("Lighting: %s", lightingMode ? "ON": "OFF");
+	ImGui::Text("OBJ UV: %s", uvMode ? "ON": "OFF");
+	ImGui::Text("Wireframe: %s", wireframe ? "ON": "OFF");
+	ImGui::Text("Normals: %s", showNormals ? "ON": "OFF");
+	ImGui::Text("Rotation: %s", rotating ? "ON": "OFF");
+
+	ImGui::Separator();
+
+	ImGui::Text("Model position: (%.1f, %.1f, %.1f)", objPos.x, objPos.y, objPos.z);
+	ImGui::Text("Zoom: %.1f", zoom);
+
+	ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("Controls"))
+    {
+        ImGui::Text("WASD/QE - Move model");
+        ImGui::Text("T - Toggle texture");
+        ImGui::Text("L - Toggle lighting");
+        ImGui::Text("U - Toggle OBJ UV");
+        ImGui::Text("F - Toggle wireframe");
+        ImGui::Text("N - Toggle normals");
+        ImGui::Text("Space - Toggle rotation");
+        ImGui::Text("R - Reset view");
+        ImGui::Text("Left drag - Rotate");
+        ImGui::Text("Right drag - Pan");
+        ImGui::Text("Scroll - Zoom");
+        ImGui::Text("Esc - Quit");
+    }
+
 	ImGui::End();
 	ImGui::Render();
+
+	return ;
+}
+
+void	ModelViewer::renderAxis(void)
+{
+	int	width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+
+    // 右上の小さな領域にだけ描画
+	int axisSize = 100;
+	glViewport(width - axisSize, height - axisSize, axisSize, axisSize);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+    // 正方形のアスペクト比で投影
+	Mat4	projection = Mat4::perspective(FOV, 1.0f, 0.1f, 100.0f);
+	Mat4	view = Mat4::translate(Mat4::identity(), Vec3(0.0f, 0.0f, -3.0f));
+
+    // モデルの回転だけ適用（位置とズームは無視）
+	Mat4	autoRot = Mat4::rotate(Mat4::identity(), rotationAngle, Vec3(0.0f, 1.0f, 0.0f));
+	Mat4	model = rotationMatrix * autoRot;
+
+	axisShader->use();
+	axisShader->setMat4("model", model);
+	axisShader->setMat4("view", view);
+	axisShader->setMat4("projection", projection);
+
+	glLineWidth(2.0f);
+	glBindVertexArray(axisVAO);
+	glDrawArrays(GL_LINES, 0, 6);
+
+    // ビューポートを元に戻す
+	glViewport(0, 0, width, height);
+
+	shader->use();
 
 	return ;
 }
@@ -303,7 +424,10 @@ void	ModelViewer::updateTransitions(void)
 	smoothTransition(uvMode, uvModeValue, TRANSITION_SPEED);
 
 	if (rotating)
+	{
 		rotationAngle += ROTATION_SPEED;
+		rotationAngle = std::fmod(rotationAngle, 2.0f * M_PI);
+	}
 }
 
 void	ModelViewer::smoothTransition(bool mode, float &value, float speed)
@@ -483,6 +607,9 @@ void	ModelViewer::loadModel(const std::string &filename)
 	rotationMatrix = Mat4::identity();
 	rotationAngle = 0.0f;
 	objPos = Vec3(0.0f, 0.0f, 0.0f);
+
+	modelPositionCount = parser.getPositionCount();
+	modelFaceCount = parser.getFaceCount();
 	
 	return ;
 }
