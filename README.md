@@ -1,4 +1,4 @@
-# C++とOpenGLで実装した3Dオブジェクトビューア
+# scop (3D model viewer)
 
 **C++とOpenGLで.obj形式の3Dモデルをリアルタイム描画するビューア**
 
@@ -83,7 +83,7 @@ $ ./scop <path/to/model.obj>	# 指定したOBJモデルを表示
 
 ## 参考にしたソースファイル
 
-* LearOpenGL (https://learnopengl.com)
+* LearnOpenGL (https://learnopengl.com)
 
 	* OpenGL/GLSLの基本概念、Shader / Textureクラス設計、VAO/VBO/EBOの使い方
 	* ファイル名：`src/Shader.cpp`, `src/Texture.cpp`, `src/ModelViewer.cpp`
