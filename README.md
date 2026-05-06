@@ -1,5 +1,7 @@
 # scop (3D model viewer)
 
+![3Dモデルビューアデモ](/resources/3d-model-viewer-1.gif "3Dモデルビューア")
+
 **C++とOpenGLで.obj形式の3Dモデルをリアルタイム描画するビューア**
 
 OBJパースから頂点データの構築、GPUへの転送、シェーダによる描画までのレンダリングパイプラインを、外部ライブラリ（GLM / stb_image / Assimp）を使用せずに実装し、描画処理の理解を目的として構築した。
