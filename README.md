@@ -70,26 +70,27 @@ $ ./scop <path/to/model.obj>	# 指定したOBJモデルを表示
 
 	* ピクセルデータがBGR順で格納されているため、読み込み時にRGB順に並び替える
 	* BITMAPINFOHEADERのbiHeightが正の値の場合は`bottom-up`、負の値の場合は`top-down`であるため、ヘッダ情報に合わせてピクセルデータの読み込み順を切り替える
-		* `src/Texture.cpp`：BMPファイルのBGR配列、top-down形式をRGB・bottom-up形式のOpenGL仕様に変換
+		* `src/Texture.cpp` の `Texture::loadBMP`：BMPヘッダの解析、BGR → RGB変換、top-down/bottom-up反転処理
 
 ## 工夫・力をいれた点
 
 * OpenGL/GLSLによるレンダリングパイプラインの構築
 
 	OBJファイルのテキストデータを描画可能な形式でGPUに渡すために **モデルデータ** → **頂点配列** → **GPUバッファ** → **シェーダ処理** という処理フローに分離した。CPU側で頂点データの生成・整形、GPU（シェーダ）側で座標変換・ライティング・ピクセル処理という、OpenGLパイプラインに沿った役割分担で実装した。
-	* `src/ObjParser.cpp`：v / vt / vn / f 行の解析、fan triangulationによる三角形分割
-	* `src/ModelViewer.cpp`：頂点データの構築、CPU→GPUへのデータ転送、描画フロー管理
+	* `src/ObjParser.cpp` の `parseFile()`, `buildVertices()`, `parseFace()`：v / vt / vn / f 行の解析、fan triangulationによる三角形分割
+	* `src/ModelViewer.cpp` の `setBuffers()`, `renderScene()`：頂点データの構築、CPU→GPUへのデータ転送、描画フロー管理
 	* `shaders/vertex.glsl`：Model / View / Projection による頂点座標変換
 
 * 3D数学ライブラリの自作
 
-	GLMを使用せずに3D数学の基礎を理解するために、 Vec3 / Vec4 / Mat4 のクラスを実装。translate / rotate / scale / perspective / lookAt 行列を含む。Mat4は内部データを`float data[4][4]`で保持し、OpenGLの列優先メモリレイアウトに合わせて格納することで、	`glUniformMatrix4fv()`への転送にtransposeを不要とした。
-	* `src/Mat4.cpp`：translate / rotate / scale / perspective / lookAt 行列演算
+	GLMを使用せずに3D数学の基礎を理解するために、 Vec3 / Vec4 / Mat4 のクラスを実装。translate / rotate / perspective / lookAt 行列を含む。Mat4は内部データを`float data[4][4]`で保持し、OpenGLの列優先メモリレイアウトに合わせて格納することで、	`glUniformMatrix4fv()`への転送にtransposeを不要とした。
+	* `src/Mat4.cpp` の `translate`, `rotate`, `perspective`, `lookAt` の各関数（列優先メモリレイアウトで `data[col][row]` へ書き込み）
 
 * 複数テクスチャマッピング方式を統合したシェーダ
 
 	OBJ由来のUV座標と平面マッピング用UVの2方式を実装。フラグメントシェーダで`mix()`による連続補間を用い、2方式間を滑らかに切り替え可能にした。同じ方法でテクスチャ表示とライティングのトグルにも適用し、シェーダ全体で一貫した制御方式とした。
 	* `shaders/fragment.glsl`：テクスチャ、ライティングなどの描画状態のリアルタイム切り替え
+	* `src/ModelViewer.cpp` の `renderScene()`, `smoothTransition()`：シェーダへのuniform値転送と、トグル状態のスムーズな繊維
 
 ## 参考にしたソースファイル
 
