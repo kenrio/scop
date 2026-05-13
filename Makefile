@@ -61,10 +61,21 @@ C_BIN		:= \
 # LIBRARIES & FRAMEWORKS
 
 
-GL_FLAGS	:= -framework OpenGL
-GLFW_FLAGS	:= -lglfw
+ifeq ($(UNAME), Linux)
+	GL_FLAGS	:= -lGL
+	GLFW_FLAGS	:= -lglfw
 
-LDFLAGS		:= -L/opt/homebrew/lib $(GL_FLAGS) $(GLFW_FLAGS)
+	X11_FLAGS	:= -lX11
+
+	LDFLAGS		:= $(GL_FLAGS) $(GLFW_FLAGS) $(X11_FLAGS) -lm
+endif
+
+ifeq ($(UNAME), Darwin)
+	GL_FLAGS	:= -framework OpenGL
+	GLFW_FLAGS	:= -lglfw
+
+	LDFLAGS		:= -L/opt/homebrew/lib $(GL_FLAGS) $(GLFW_FLAGS)
+endif
 
 
 # **************************************************************************** #

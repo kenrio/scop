@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 #include <cmath>
+#include <algorithm>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
